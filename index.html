@@ -11,9 +11,37 @@
   <style>
     html, body { height: 100%; margin: 0; }
     #map { height: 100vh; width: 100%; }
-    .ui { position: absolute; z-index: 9999; left: 12px; top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
-    .btn { padding: 10px 12px; border: 1px solid #ddd; border-radius: 10px; background: #fff; font-size: 14px; cursor: pointer; }
-    .note { position: absolute; z-index: 9999; left: 12px; bottom: 12px; background: rgba(255,255,255,0.95); padding: 10px 12px; border-radius: 10px; border: 1px solid #eee; font-size: 12px; max-width: 92%; line-height: 1.35; }
+    .ui {
+      position: absolute;
+      z-index: 9999;
+      left: 12px;
+      top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background: #fff;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .note {
+      position: absolute;
+      z-index: 9999;
+      left: 12px;
+      bottom: 12px;
+      background: rgba(255,255,255,0.95);
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #eee;
+      font-size: 12px;
+      max-width: 92%;
+      line-height: 1.35;
+      white-space: pre-wrap;
+    }
   </style>
 </head>
 <body>
@@ -30,7 +58,11 @@
     // 0) 地図の初期化
     // =========================
     const map = L.map('map').setView([28.3, 129.5], 10);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
     let myMarker = null;
     let myCircle = null;
@@ -45,6 +77,7 @@
         statusEl.textContent = 'この端末は位置情報に対応していません。';
         return;
       }
+
       statusEl.textContent = '位置情報を取得しています…（許可が出たら「許可」）';
 
       navigator.geolocation.getCurrentPosition(
@@ -56,37 +89,51 @@
           if (myMarker) myMarker.remove();
           if (myCircle) myCircle.remove();
 
-          myMarker = L.circleMarker([lat,lng], {
-            radius: 8, color: '#1a73e8', fillColor: '#1a73e8', fillOpacity: 0.9, weight: 2
+          myMarker = L.circleMarker([lat, lng], {
+            radius: 8,
+            color: '#1a73e8',
+            fillColor: '#1a73e8',
+            fillOpacity: 0.9,
+            weight: 2
           }).addTo(map);
 
-          myCircle = L.circle([lat,lng], {
-            radius: acc, color: '#1a73e8', fillColor: '#1a73e8', fillOpacity: 0.12, weight: 1
+          myCircle = L.circle([lat, lng], {
+            radius: acc,
+            color: '#1a73e8',
+            fillColor: '#1a73e8',
+            fillOpacity: 0.12,
+            weight: 1
           }).addTo(map);
 
-          map.setView([lat,lng], 16);
+          map.setView([lat, lng], 16);
           statusEl.textContent = `現在地を表示しました（精度目安: 約 ${Math.round(acc)}m）`;
         },
         (err) => {
           statusEl.textContent = `位置情報を取得できません：${err.message}`;
         },
-        { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+        {
+          enableHighAccuracy: true,
+          timeout: 12000,
+          maximumAge: 0
+        }
       );
     });
 
     // =========================
-    // 1) CSV一覧（ここに4本入れる）
+    // 1) 読み込むCSV一覧
     // =========================
     const CSV_SOURCES = [
       {
         name: '飲食店',
         url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvwgDgQv9UOEo1mKG7Slw3rrIvCF2yszFFIBPdaBHfp-whb_S5vxtJdh59rJDjqf3sEQy-qs2iMMjL/pub?output=csv',
         color: '#e91e63'
-      },
-      // ここに他のCSVも追加してOK
-      // { name:'ショッピング', url:'...', color:'#00bcd4' },
-      // { name:'観光', url:'...', color:'#ff9800' },
-      // { name:'注意', url:'...', color:'#8bc34a' },
+      }
+      // 必要ならここに追加
+      // ,{
+      //   name: 'ショッピング',
+      //   url: 'https://docs.google.com/spreadsheets/d/e/xxxxxxxx/pub?output=csv',
+      //   color: '#00bcd4'
+      // }
     ];
 
     // =========================
@@ -94,12 +141,18 @@
     // =========================
     function escapeHtml(str) {
       return String(str ?? '').replace(/[&<>"']/g, s => ({
-        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+        '&':'&amp;',
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#39;'
       }[s]));
     }
+
     function escapeAttr(str) {
       return String(str ?? '').replace(/"/g, '%22');
     }
+
     function toNumber(v) {
       if (v == null) return null;
       const s = String(v).trim();
@@ -118,16 +171,37 @@
         const c = text[i];
         const next = text[i + 1];
 
-        if (c === '"' && inQuotes && next === '"') { cur += '"'; i++; continue; }
-        if (c === '"') { inQuotes = !inQuotes; continue; }
-        if (c === ',' && !inQuotes) { row.push(cur); cur = ''; continue; }
+        if (c === '"' && inQuotes && next === '"') {
+          cur += '"';
+          i++;
+          continue;
+        }
+        if (c === '"') {
+          inQuotes = !inQuotes;
+          continue;
+        }
+        if (c === ',' && !inQuotes) {
+          row.push(cur);
+          cur = '';
+          continue;
+        }
         if ((c === '\n' || c === '\r') && !inQuotes) {
-          if (cur.length || row.length) { row.push(cur); rows.push(row); row = []; cur = ''; }
+          if (cur.length || row.length) {
+            row.push(cur);
+            rows.push(row);
+            row = [];
+            cur = '';
+          }
           continue;
         }
         cur += c;
       }
-      if (cur.length || row.length) { row.push(cur); rows.push(row); }
+
+      if (cur.length || row.length) {
+        row.push(cur);
+        rows.push(row);
+      }
+
       return rows;
     }
 
@@ -140,96 +214,145 @@
       return null;
     }
 
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
     // =========================
-    // 3) 住所 → 緯度経度（Nominatim）
-    //    ・localStorageでキャッシュ
-    //    ・連続リクエストを避けるために待機
+    // 3) 住所 → 緯度経度（キャッシュ付き）
     // =========================
-    const GEO_CACHE_KEY = 'amami_geocode_cache_v1';
+    const GEO_CACHE_KEY = 'amami_geocode_cache_v2';
     const geoCache = (() => {
-      try { return JSON.parse(localStorage.getItem(GEO_CACHE_KEY) || '{}'); }
-      catch { return {}; }
+      try {
+        return JSON.parse(localStorage.getItem(GEO_CACHE_KEY) || '{}');
+      } catch {
+        return {};
+      }
     })();
 
     function saveGeoCache() {
-      try { localStorage.setItem(GEO_CACHE_KEY, JSON.stringify(geoCache)); } catch {}
+      try {
+        localStorage.setItem(GEO_CACHE_KEY, JSON.stringify(geoCache));
+      } catch {}
     }
 
-    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
     async function geocodeAddress(address) {
-      const key = String(address || '').trim();
-      if (!key) return null;
+      const raw = String(address || '').trim();
+      if (!raw) return null;
 
-      // キャッシュがあれば即返す
-      if (geoCache[key]) return geoCache[key];
+      // 郵便番号や〒を除去
+      const cleaned = raw
+        .replace(/〒\s*\d{3}-?\d{4}/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
 
-      // Nominatim（OSM）で住所検索
-      const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(key);
+      // 日本を足して検索しやすくする
+      const query = `${cleaned}, Japan`;
 
-      // 連打を避ける（1秒待機）
+      if (geoCache[query]) {
+        return geoCache[query];
+      }
+
+      const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(query);
+
+      // 連打回避
       await sleep(1100);
 
-      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-      if (!res.ok) return null;
+      console.log('geocode query:', query);
+
+      const res = await fetch(url, {
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!res.ok) {
+        console.warn('geocode fetch failed:', query, res.status);
+        return null;
+      }
 
       const json = await res.json();
-      if (!json || !json[0]) return null;
+      console.log('geocode result:', query, json);
+
+      if (!json || !json[0]) {
+        return null;
+      }
 
       const lat = Number(json[0].lat);
       const lng = Number(json[0].lon);
-      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
 
-      geoCache[key] = { lat, lng };
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        return null;
+      }
+
+      geoCache[query] = { lat, lng };
       saveGeoCache();
-      return geoCache[key];
+
+      return geoCache[query];
     }
 
     // =========================
-    // 4) CSV読み込み → ピン追加（lat/lngが無ければaddressから作る）
+    // 4) CSVからピン追加
     // =========================
     async function addMarkersFromCSV(url, layer, color, sourceName) {
       const res = await fetch(url, { cache: 'no-store' });
+
       if (!res.ok) {
         console.warn('CSV fetch failed:', url, res.status);
         return;
       }
+
       const text = await res.text();
       const rows = parseCSV(text);
-      if (rows.length < 2) return;
+
+      console.log(`[${sourceName}] rows raw:`, rows);
+
+      if (rows.length < 2) {
+        console.warn(`[${sourceName}] rows.length < 2`, rows);
+        return;
+      }
 
       const headers = rows[0].map(h => (h || '').trim());
       const dataRows = rows.slice(1);
 
-      // 今回のあなたのCSVヘッダーに合わせて候補を広めに
+      console.log(`[${sourceName}] headers:`, headers);
+      console.log(`[${sourceName}] dataRows count:`, dataRows.length);
+
       const titleKey   = pickKey(headers, ['title', 'name', '店名', '名称', 'スポット名']);
       const addressKey = pickKey(headers, ['address', '住所']);
       const descKey    = pickKey(headers, ['description', 'desc', '説明', 'メモ', '備考', '詳細']);
       const otherKey   = pickKey(headers, ['other', 'その他']);
-      // lat/lngがある場合も一応対応
       const latKey     = pickKey(headers, ['lat', 'latitude', '緯度']);
       const lngKey     = pickKey(headers, ['lng', 'lon', 'longitude', '経度']);
 
+      console.log(`[${sourceName}] titleKey=${titleKey}, addressKey=${addressKey}, descKey=${descKey}, otherKey=${otherKey}, latKey=${latKey}, lngKey=${lngKey}`);
+
       const idx = {};
-      headers.forEach((h, i) => (idx[h] = i));
+      headers.forEach((h, i) => {
+        idx[h] = i;
+      });
 
       let success = 0;
       let failed = 0;
 
       for (const cols of dataRows) {
-        const title = titleKey ? (cols[idx[titleKey]] || '').trim() : '';
+        const title   = titleKey   ? (cols[idx[titleKey]] || '').trim() : '';
         const address = addressKey ? (cols[idx[addressKey]] || '').trim() : '';
-        const desc = descKey ? (cols[idx[descKey]] || '').trim() : '';
-        const other = otherKey ? (cols[idx[otherKey]] || '').trim() : '';
+        const desc    = descKey    ? (cols[idx[descKey]] || '').trim() : '';
+        const other   = otherKey   ? (cols[idx[otherKey]] || '').trim() : '';
 
-        // 1) lat/lng列があるならそれを優先
+        console.log(`[${sourceName}] row:`, { title, address, desc, other });
+
         let lat = latKey ? toNumber(cols[idx[latKey]]) : null;
         let lng = lngKey ? toNumber(cols[idx[lngKey]]) : null;
 
-        // 2) 無ければ住所からジオコーディング
         if (lat == null || lng == null) {
           const geo = await geocodeAddress(address);
-          if (!geo) { failed++; continue; }
+          if (!geo) {
+            console.warn(`[${sourceName}] geocode failed:`, address);
+            failed++;
+            continue;
+          }
           lat = geo.lat;
           lng = geo.lng;
         }
@@ -270,12 +393,14 @@
     }
 
     // =========================
-    // 5) レイヤー作成＆読み込み開始
+    // 5) レイヤー作成＆実行
     // =========================
     const poiLayers = {};
+
     CSV_SOURCES.forEach(src => {
       poiLayers[src.name] = L.layerGroup().addTo(map);
     });
+
     L.control.layers(null, poiLayers, { collapsed: true }).addTo(map);
 
     (async () => {
@@ -284,7 +409,7 @@
         for (const src of CSV_SOURCES) {
           await addMarkersFromCSV(src.url, poiLayers[src.name], src.color, src.name);
         }
-        statusEl.textContent = '「📍 現在地を表示」を押してください。';
+        statusEl.textContent = '📍「現在地を表示」を押してください。';
       } catch (e) {
         console.error(e);
         statusEl.textContent = 'スポット情報の読み込みでエラーが発生しました。';
