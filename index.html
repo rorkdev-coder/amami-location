@@ -11,9 +11,9 @@
   <style>
     html, body { height: 100%; margin: 0; }
     #map { height: 100vh; width: 100%; }
-    .ui { position: absolute; z-index: 9999; left: 12px; top: 12px; display: flex; gap: 8px; }
-    .btn { padding: 10px 12px; border: 1px solid #ddd; border-radius: 10px; background: #fff; font-size: 14px; }
-    .note { position: absolute; z-index: 9999; left: 12px; bottom: 12px; background: rgba(255,255,255,0.95); padding: 10px 12px; border-radius: 10px; border: 1px solid #eee; font-size: 12px; max-width: 92%; }
+    .ui { position: absolute; z-index: 9999; left: 12px; top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn { padding: 10px 12px; border: 1px solid #ddd; border-radius: 10px; background: #fff; font-size: 14px; cursor: pointer; }
+    .note { position: absolute; z-index: 9999; left: 12px; bottom: 12px; background: rgba(255,255,255,0.95); padding: 10px 12px; border-radius: 10px; border: 1px solid #eee; font-size: 12px; max-width: 92%; line-height: 1.35; }
   </style>
 </head>
 <body>
@@ -21,19 +21,23 @@
     <button class="btn" id="locateBtn">📍 現在地を表示</button>
     <button class="btn" id="openFullBtn">↗ 全画面で開く</button>
   </div>
+
   <div id="map"></div>
   <div class="note" id="status">「📍 現在地を表示」を押してください。</div>
 
   <script>
+    // =========================
+    // 0) 地図の初期化
+    // =========================
     const map = L.map('map').setView([28.3, 129.5], 10);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
-    let marker = null;
-    let circle = null;
+    let myMarker = null;
+    let myCircle = null;
     const statusEl = document.getElementById('status');
 
     document.getElementById('openFullBtn').addEventListener('click', () => {
-      window.open(window.location.href, '_blank');
+      window.open(window.location.href, '_blank', 'noopener,noreferrer');
     });
 
     document.getElementById('locateBtn').addEventListener('click', () => {
@@ -49,14 +53,15 @@
           const lng = pos.coords.longitude;
           const acc = pos.coords.accuracy || 0;
 
-          if (marker) marker.remove();
-          if (circle) circle.remove();
+          if (myMarker) myMarker.remove();
+          if (myCircle) myCircle.remove();
 
-          marker = L.circleMarker([lat,lng], {
+          // “青い点っぽい”表示
+          myMarker = L.circleMarker([lat,lng], {
             radius: 8, color: '#1a73e8', fillColor: '#1a73e8', fillOpacity: 0.9, weight: 2
           }).addTo(map);
 
-          circle = L.circle([lat,lng], {
+          myCircle = L.circle([lat,lng], {
             radius: acc, color: '#1a73e8', fillColor: '#1a73e8', fillOpacity: 0.12, weight: 1
           }).addTo(map);
 
@@ -69,6 +74,194 @@
         { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
       );
     });
+
+    // =========================
+    // 1) CSVからピンを読み込む設定
+    // =========================
+    const CSV_SOURCES = [
+      {
+        name: 'CSV1',
+        url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSavZHzE950-K3RUW9TMuCHLzVUL6Dx8CWJ0AF9hO2vhN1FhwOSDzhL5gvvFTxMU6d-PwGroUa7JpUY/pub?output=csv',
+        color: '#e91e63'
+      },
+      {
+        name: 'CSV2',
+        url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQL2POGcz0l8dMbkx9cLw7AvQ1Ji2tYmpe-ZTAFYqqIYaBih8R1B8HDKO7ztS2pfMMo3-vJHAJXoZv_/pub?output=csv',
+        color: '#00bcd4'
+      },
+      {
+        name: 'CSV3',
+        url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS5jia2o_Ae3xaAFMaDl05olqly6u9eeeCtxkUI1e5z5RAhUxvNzQpmA-FuX92a_ocS7IBQHc7zFbxB/pub?output=csv',
+        color: '#ff9800'
+      },
+      {
+        name: 'CSV4',
+        url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvwgDgQv9UOEo1mKG7Slw3rrIvCF2yszFFIBPdaBHfp-whb_S5vxtJdh59rJDjqf3sEQy-qs2iMMjL/pub?output=csv',
+        color: '#8bc34a'
+      }
+    ];
+
+    // =========================
+    // 2) ユーティリティ
+    // =========================
+    function escapeHtml(str) {
+      return String(str ?? '').replace(/[&<>"']/g, s => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      }[s]));
+    }
+    function escapeAttr(str) {
+      return String(str ?? '').replace(/"/g, '%22');
+    }
+    function toNumber(v) {
+      if (v == null) return null;
+      const s = String(v).trim();
+      if (!s) return null;
+      const n = Number(s);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    // 引用符対応の簡易CSVパーサ（Google Sheets CSV想定）
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let cur = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        const next = text[i + 1];
+
+        if (c === '"' && inQuotes && next === '"') { // "" → "
+          cur += '"';
+          i++;
+          continue;
+        }
+        if (c === '"') {
+          inQuotes = !inQuotes;
+          continue;
+        }
+        if (c === ',' && !inQuotes) {
+          row.push(cur);
+          cur = '';
+          continue;
+        }
+        if ((c === '\n' || c === '\r') && !inQuotes) {
+          if (cur.length || row.length) {
+            row.push(cur);
+            rows.push(row);
+            row = [];
+            cur = '';
+          }
+          continue;
+        }
+        cur += c;
+      }
+      if (cur.length || row.length) {
+        row.push(cur);
+        rows.push(row);
+      }
+      return rows;
+    }
+
+    // ヘッダーから列名候補を探す
+    function pickKey(headers, candidates) {
+      const lower = headers.map(h => (h || '').toString().trim().toLowerCase());
+      for (const cand of candidates) {
+        const idx = lower.indexOf(cand.toLowerCase());
+        if (idx >= 0) return headers[idx];
+      }
+      return null;
+    }
+
+    // =========================
+    // 3) CSV 1本を読み込んでピン追加
+    // =========================
+    async function addMarkersFromCSV(url, layer, color) {
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) {
+        console.warn('CSV fetch failed:', url, res.status);
+        return;
+      }
+
+      const text = await res.text();
+      const rows = parseCSV(text);
+      if (rows.length < 2) return;
+
+      const headers = rows[0].map(h => (h || '').trim());
+      const dataRows = rows.slice(1);
+
+      // よくある列名候補（必要なら追加できます）
+      const latKey = pickKey(headers, ['lat', 'latitude', '緯度']);
+      const lngKey = pickKey(headers, ['lng', 'lon', 'longitude', '経度']);
+      const titleKey = pickKey(headers, ['title', 'name', '店名', '名称', 'スポット名']);
+      const descKey  = pickKey(headers, ['description', 'desc', '説明', 'メモ', '備考', '詳細']);
+      const gmapKey  = pickKey(headers, ['google_maps_url', 'maps_url', 'googlemap', 'google map url', 'url', 'リンク']);
+
+      if (!latKey || !lngKey) {
+        console.warn('lat/lng columns not found in CSV:', url, headers);
+        return;
+      }
+
+      const idx = {};
+      headers.forEach((h, i) => (idx[h] = i));
+
+      dataRows.forEach(cols => {
+        const lat = toNumber(cols[idx[latKey]]);
+        const lng = toNumber(cols[idx[lngKey]]);
+        if (lat == null || lng == null) return;
+
+        const title = titleKey ? (cols[idx[titleKey]] || '').trim() : '';
+        const desc  = descKey  ? (cols[idx[descKey]]  || '').trim() : '';
+        const gmap  = gmapKey  ? (cols[idx[gmapKey]]  || '').trim() : '';
+
+        const marker = L.circleMarker([lat, lng], {
+          radius: 8,
+          color,
+          fillColor: color,
+          fillOpacity: 0.9,
+          weight: 2
+        });
+
+        const safeTitle = title ? `<div style="font-weight:700;margin-bottom:6px;">${escapeHtml(title)}</div>` : '';
+        const safeDesc  = desc  ? `<div style="margin-bottom:8px;white-space:pre-wrap;">${escapeHtml(desc)}</div>` : '';
+
+        const navUrl = `https://www.google.com/maps/dir/?api=1&origin=Current+Location&destination=${lat},${lng}&travelmode=walking`;
+
+        const links = `
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            ${gmap ? `<a href="${escapeAttr(gmap)}" target="_blank" rel="noopener">Googleマップで開く</a>` : ''}
+            <a href="${navUrl}" target="_blank" rel="noopener">現在地から案内</a>
+          </div>
+        `;
+
+        marker.bindPopup(`${safeTitle}${safeDesc}${links}`);
+        marker.addTo(layer);
+      });
+    }
+
+    // =========================
+    // 4) レイヤー作成＆読み込み開始
+    // =========================
+    const poiLayers = {};
+    CSV_SOURCES.forEach(src => {
+      poiLayers[src.name] = L.layerGroup().addTo(map);
+    });
+
+    // 右上のレイヤ切り替え（collapse=trueでスマホでも邪魔しにくい）
+    L.control.layers(null, poiLayers, { collapsed: true }).addTo(map);
+
+    (async () => {
+      try {
+        statusEl.textContent = 'スポット情報を読み込んでいます…';
+        for (const src of CSV_SOURCES) {
+          await addMarkersFromCSV(src.url, poiLayers[src.name], src.color);
+        }
+        statusEl.textContent = '「📍 現在地を表示」を押してください。';
+      } catch (e) {
+        console.error(e);
+        statusEl.textContent = 'スポット情報の読み込みでエラーが発生しました。';
+      }
+    })();
   </script>
 </body>
 </html>
