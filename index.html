@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Current Location Map</title>
+  <title>Amami - Current Location Map</title>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -23,7 +23,7 @@
   </div>
 
   <div id="map"></div>
-  <div class="note" id="status">「📍 現在地を表示」を押してください。</div>
+  <div class="note" id="status">スポット情報を読み込んでいます…</div>
 
   <script>
     // =========================
@@ -56,7 +56,6 @@
           if (myMarker) myMarker.remove();
           if (myCircle) myCircle.remove();
 
-          // “青い点っぽい”表示
           myMarker = L.circleMarker([lat,lng], {
             radius: 8, color: '#1a73e8', fillColor: '#1a73e8', fillOpacity: 0.9, weight: 2
           }).addTo(map);
@@ -76,29 +75,18 @@
     });
 
     // =========================
-    // 1) CSVからピンを読み込む設定
+    // 1) CSV一覧（ここに4本入れる）
     // =========================
     const CSV_SOURCES = [
       {
-        name: 'CSV1',
-        url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSavZHzE950-K3RUW9TMuCHLzVUL6Dx8CWJ0AF9hO2vhN1FhwOSDzhL5gvvFTxMU6d-PwGroUa7JpUY/pub?output=csv',
+        name: '飲食店',
+        url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvwgDgQv9UOEo1mKG7Slw3rrIvCF2yszFFIBPdaBHfp-whb_S5vxtJdh59rJDjqf3sEQy-qs2iMMjL/pub?output=csv',
         color: '#e91e63'
       },
-      {
-        name: 'CSV2',
-        url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQL2POGcz0l8dMbkx9cLw7AvQ1Ji2tYmpe-ZTAFYqqIYaBih8R1B8HDKO7ztS2pfMMo3-vJHAJXoZv_/pub?output=csv',
-        color: '#00bcd4'
-      },
-      {
-        name: 'CSV3',
-        url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS5jia2o_Ae3xaAFMaDl05olqly6u9eeeCtxkUI1e5z5RAhUxvNzQpmA-FuX92a_ocS7IBQHc7zFbxB/pub?output=csv',
-        color: '#ff9800'
-      },
-      {
-        name: 'CSV4',
-        url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvwgDgQv9UOEo1mKG7Slw3rrIvCF2yszFFIBPdaBHfp-whb_S5vxtJdh59rJDjqf3sEQy-qs2iMMjL/pub?output=csv',
-        color: '#8bc34a'
-      }
+      // ここに他のCSVも追加してOK
+      // { name:'ショッピング', url:'...', color:'#00bcd4' },
+      // { name:'観光', url:'...', color:'#ff9800' },
+      // { name:'注意', url:'...', color:'#8bc34a' },
     ];
 
     // =========================
@@ -120,7 +108,6 @@
       return Number.isFinite(n) ? n : null;
     }
 
-    // 引用符対応の簡易CSVパーサ（Google Sheets CSV想定）
     function parseCSV(text) {
       const rows = [];
       let row = [];
@@ -131,39 +118,19 @@
         const c = text[i];
         const next = text[i + 1];
 
-        if (c === '"' && inQuotes && next === '"') { // "" → "
-          cur += '"';
-          i++;
-          continue;
-        }
-        if (c === '"') {
-          inQuotes = !inQuotes;
-          continue;
-        }
-        if (c === ',' && !inQuotes) {
-          row.push(cur);
-          cur = '';
-          continue;
-        }
+        if (c === '"' && inQuotes && next === '"') { cur += '"'; i++; continue; }
+        if (c === '"') { inQuotes = !inQuotes; continue; }
+        if (c === ',' && !inQuotes) { row.push(cur); cur = ''; continue; }
         if ((c === '\n' || c === '\r') && !inQuotes) {
-          if (cur.length || row.length) {
-            row.push(cur);
-            rows.push(row);
-            row = [];
-            cur = '';
-          }
+          if (cur.length || row.length) { row.push(cur); rows.push(row); row = []; cur = ''; }
           continue;
         }
         cur += c;
       }
-      if (cur.length || row.length) {
-        row.push(cur);
-        rows.push(row);
-      }
+      if (cur.length || row.length) { row.push(cur); rows.push(row); }
       return rows;
     }
 
-    // ヘッダーから列名候補を探す
     function pickKey(headers, candidates) {
       const lower = headers.map(h => (h || '').toString().trim().toLowerCase());
       for (const cand of candidates) {
@@ -174,15 +141,59 @@
     }
 
     // =========================
-    // 3) CSV 1本を読み込んでピン追加
+    // 3) 住所 → 緯度経度（Nominatim）
+    //    ・localStorageでキャッシュ
+    //    ・連続リクエストを避けるために待機
     // =========================
-    async function addMarkersFromCSV(url, layer, color) {
+    const GEO_CACHE_KEY = 'amami_geocode_cache_v1';
+    const geoCache = (() => {
+      try { return JSON.parse(localStorage.getItem(GEO_CACHE_KEY) || '{}'); }
+      catch { return {}; }
+    })();
+
+    function saveGeoCache() {
+      try { localStorage.setItem(GEO_CACHE_KEY, JSON.stringify(geoCache)); } catch {}
+    }
+
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    async function geocodeAddress(address) {
+      const key = String(address || '').trim();
+      if (!key) return null;
+
+      // キャッシュがあれば即返す
+      if (geoCache[key]) return geoCache[key];
+
+      // Nominatim（OSM）で住所検索
+      const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(key);
+
+      // 連打を避ける（1秒待機）
+      await sleep(1100);
+
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (!res.ok) return null;
+
+      const json = await res.json();
+      if (!json || !json[0]) return null;
+
+      const lat = Number(json[0].lat);
+      const lng = Number(json[0].lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+
+      geoCache[key] = { lat, lng };
+      saveGeoCache();
+      return geoCache[key];
+    }
+
+    // =========================
+    // 4) CSV読み込み → ピン追加（lat/lngが無ければaddressから作る）
+    // =========================
+    async function addMarkersFromCSV(url, layer, color, sourceName) {
       const res = await fetch(url, { cache: 'no-store' });
       if (!res.ok) {
         console.warn('CSV fetch failed:', url, res.status);
         return;
       }
-
       const text = await res.text();
       const rows = parseCSV(text);
       if (rows.length < 2) return;
@@ -190,29 +201,38 @@
       const headers = rows[0].map(h => (h || '').trim());
       const dataRows = rows.slice(1);
 
-      // よくある列名候補（必要なら追加できます）
-      const latKey = pickKey(headers, ['lat', 'latitude', '緯度']);
-      const lngKey = pickKey(headers, ['lng', 'lon', 'longitude', '経度']);
-      const titleKey = pickKey(headers, ['title', 'name', '店名', '名称', 'スポット名']);
-      const descKey  = pickKey(headers, ['description', 'desc', '説明', 'メモ', '備考', '詳細']);
-      const gmapKey  = pickKey(headers, ['google_maps_url', 'maps_url', 'googlemap', 'google map url', 'url', 'リンク']);
-
-      if (!latKey || !lngKey) {
-        console.warn('lat/lng columns not found in CSV:', url, headers);
-        return;
-      }
+      // 今回のあなたのCSVヘッダーに合わせて候補を広めに
+      const titleKey   = pickKey(headers, ['title', 'name', '店名', '名称', 'スポット名']);
+      const addressKey = pickKey(headers, ['address', '住所']);
+      const descKey    = pickKey(headers, ['description', 'desc', '説明', 'メモ', '備考', '詳細']);
+      const otherKey   = pickKey(headers, ['other', 'その他']);
+      // lat/lngがある場合も一応対応
+      const latKey     = pickKey(headers, ['lat', 'latitude', '緯度']);
+      const lngKey     = pickKey(headers, ['lng', 'lon', 'longitude', '経度']);
 
       const idx = {};
       headers.forEach((h, i) => (idx[h] = i));
 
-      dataRows.forEach(cols => {
-        const lat = toNumber(cols[idx[latKey]]);
-        const lng = toNumber(cols[idx[lngKey]]);
-        if (lat == null || lng == null) return;
+      let success = 0;
+      let failed = 0;
 
+      for (const cols of dataRows) {
         const title = titleKey ? (cols[idx[titleKey]] || '').trim() : '';
-        const desc  = descKey  ? (cols[idx[descKey]]  || '').trim() : '';
-        const gmap  = gmapKey  ? (cols[idx[gmapKey]]  || '').trim() : '';
+        const address = addressKey ? (cols[idx[addressKey]] || '').trim() : '';
+        const desc = descKey ? (cols[idx[descKey]] || '').trim() : '';
+        const other = otherKey ? (cols[idx[otherKey]] || '').trim() : '';
+
+        // 1) lat/lng列があるならそれを優先
+        let lat = latKey ? toNumber(cols[idx[latKey]]) : null;
+        let lng = lngKey ? toNumber(cols[idx[lngKey]]) : null;
+
+        // 2) 無ければ住所からジオコーディング
+        if (lat == null || lng == null) {
+          const geo = await geocodeAddress(address);
+          if (!geo) { failed++; continue; }
+          lat = geo.lat;
+          lng = geo.lng;
+        }
 
         const marker = L.circleMarker([lat, lng], {
           radius: 8,
@@ -223,38 +243,46 @@
         });
 
         const safeTitle = title ? `<div style="font-weight:700;margin-bottom:6px;">${escapeHtml(title)}</div>` : '';
-        const safeDesc  = desc  ? `<div style="margin-bottom:8px;white-space:pre-wrap;">${escapeHtml(desc)}</div>` : '';
+        const safeOther = other ? `<div style="margin-bottom:6px;color:#444;">${escapeHtml(other)}</div>` : '';
+        const safeDesc  = desc ? `<div style="margin-bottom:8px;white-space:pre-wrap;">${escapeHtml(desc)}</div>` : '';
+        const safeAddr  = address ? `<div style="margin-bottom:8px;color:#666;white-space:pre-wrap;">${escapeHtml(address)}</div>` : '';
+
+        const gmapSearch = address
+          ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
+          : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(title)}`;
 
         const navUrl = `https://www.google.com/maps/dir/?api=1&origin=Current+Location&destination=${lat},${lng}&travelmode=walking`;
 
         const links = `
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            ${gmap ? `<a href="${escapeAttr(gmap)}" target="_blank" rel="noopener">Googleマップで開く</a>` : ''}
+            <a href="${escapeAttr(gmapSearch)}" target="_blank" rel="noopener">Googleマップで開く</a>
             <a href="${navUrl}" target="_blank" rel="noopener">現在地から案内</a>
           </div>
+          <div style="margin-top:6px;color:#999;font-size:11px;">(${escapeHtml(sourceName)})</div>
         `;
 
-        marker.bindPopup(`${safeTitle}${safeDesc}${links}`);
+        marker.bindPopup(`${safeTitle}${safeOther}${safeDesc}${safeAddr}${links}`);
         marker.addTo(layer);
-      });
+        success++;
+      }
+
+      console.log(`[${sourceName}] success=${success}, failed=${failed}`);
     }
 
     // =========================
-    // 4) レイヤー作成＆読み込み開始
+    // 5) レイヤー作成＆読み込み開始
     // =========================
     const poiLayers = {};
     CSV_SOURCES.forEach(src => {
       poiLayers[src.name] = L.layerGroup().addTo(map);
     });
-
-    // 右上のレイヤ切り替え（collapse=trueでスマホでも邪魔しにくい）
     L.control.layers(null, poiLayers, { collapsed: true }).addTo(map);
 
     (async () => {
       try {
-        statusEl.textContent = 'スポット情報を読み込んでいます…';
+        statusEl.textContent = 'スポット情報を読み込んでいます…（初回は少し時間がかかります）';
         for (const src of CSV_SOURCES) {
-          await addMarkersFromCSV(src.url, poiLayers[src.name], src.color);
+          await addMarkersFromCSV(src.url, poiLayers[src.name], src.color, src.name);
         }
         statusEl.textContent = '「📍 現在地を表示」を押してください。';
       } catch (e) {
