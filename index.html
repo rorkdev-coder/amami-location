@@ -3,19 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Amami - Current Location Map</title>
-
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
+  <title>奄美観光マップ</title>
   <style>
-    html, body { height: 100%; margin: 0; }
-    #map { height: 100vh; width: 100%; }
-    .ui {
+    html, body {
+      margin: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+    }
+    #map {
+      width: 100%;
+      height: 100vh;
+    }
+    .controls {
       position: absolute;
-      z-index: 9999;
-      left: 12px;
       top: 12px;
+      left: 12px;
+      z-index: 10;
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
@@ -24,397 +27,201 @@
       padding: 10px 12px;
       border: 1px solid #ddd;
       border-radius: 10px;
-      background: #fff;
-      font-size: 14px;
+      background: white;
       cursor: pointer;
+      font-size: 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+      text-decoration: none;
+      color: #000;
+      display: inline-block;
     }
-    .note {
+    .status {
       position: absolute;
-      z-index: 9999;
       left: 12px;
       bottom: 12px;
+      z-index: 10;
       background: rgba(255,255,255,0.95);
-      padding: 10px 12px;
-      border-radius: 10px;
       border: 1px solid #eee;
-      font-size: 12px;
+      border-radius: 10px;
+      padding: 10px 12px;
       max-width: 92%;
-      line-height: 1.35;
-      white-space: pre-wrap;
+      font-size: 12px;
+      line-height: 1.4;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
     }
   </style>
 </head>
 <body>
-  <div class="ui">
+  <div class="controls">
     <button class="btn" id="locateBtn">📍 現在地を表示</button>
-    <button class="btn" id="openFullBtn">↗ 全画面で開く</button>
+    <a class="btn" id="openSelfBtn" href="#" target="_blank" rel="noopener">↗ 別ページで開く</a>
   </div>
 
   <div id="map"></div>
-  <div class="note" id="status">スポット情報を読み込んでいます…</div>
+  <div class="status" id="status">地図を読み込んでいます…</div>
 
   <script>
-    // =========================
-    // 0) 地図の初期化
-    // =========================
-    const map = L.map('map').setView([28.3, 129.5], 10);
+    let map;
+    let infoWindow;
+    let currentMarker = null;
+    let currentCircle = null;
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    let myMarker = null;
-    let myCircle = null;
-    const statusEl = document.getElementById('status');
-
-    document.getElementById('openFullBtn').addEventListener('click', () => {
-      window.open(window.location.href, '_blank', 'noopener,noreferrer');
-    });
-
-    document.getElementById('locateBtn').addEventListener('click', () => {
-      if (!navigator.geolocation) {
-        statusEl.textContent = 'この端末は位置情報に対応していません。';
-        return;
-      }
-
-      statusEl.textContent = '位置情報を取得しています…（許可が出たら「許可」）';
-
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          const acc = pos.coords.accuracy || 0;
-
-          if (myMarker) myMarker.remove();
-          if (myCircle) myCircle.remove();
-
-          myMarker = L.circleMarker([lat, lng], {
-            radius: 8,
-            color: '#1a73e8',
-            fillColor: '#1a73e8',
-            fillOpacity: 0.9,
-            weight: 2
-          }).addTo(map);
-
-          myCircle = L.circle([lat, lng], {
-            radius: acc,
-            color: '#1a73e8',
-            fillColor: '#1a73e8',
-            fillOpacity: 0.12,
-            weight: 1
-          }).addTo(map);
-
-          map.setView([lat, lng], 16);
-          statusEl.textContent = `現在地を表示しました（精度目安: 約 ${Math.round(acc)}m）`;
-        },
-        (err) => {
-          statusEl.textContent = `位置情報を取得できません：${err.message}`;
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 12000,
-          maximumAge: 0
-        }
-      );
-    });
-
-    // =========================
-    // 1) 読み込むCSV一覧
-    // =========================
-    const CSV_SOURCES = [
+    const spots = [
       {
-        name: '飲食店',
-        url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvwgDgQv9UOEo1mKG7Slw3rrIvCF2yszFFIBPdaBHfp-whb_S5vxtJdh59rJDjqf3sEQy-qs2iMMjL/pub?output=csv',
-        color: '#e91e63'
+        lat: 28.387954640773568,
+        lng: 129.4853607002732,
+        title: "ハブ出没注意（仮）",
+        category: "注意",
+        description: "ハブの発生情報あり\n通行時に注意してください"
+      },
+      {
+        lat: 28.392135308080416,
+        lng: 129.48924318258508,
+        title: "観光案内の想定地点",
+        category: "案内",
+        description: "サンプル地点です"
+      },
+      {
+        lat: 28.3912,
+        lng: 129.4877,
+        title: "飲食店サンプル",
+        category: "飲食",
+        description: "クルーズ客歓迎"
       }
-      // 必要ならここに追加
-      // ,{
-      //   name: 'ショッピング',
-      //   url: 'https://docs.google.com/spreadsheets/d/e/xxxxxxxx/pub?output=csv',
-      //   color: '#00bcd4'
-      // }
     ];
 
-    // =========================
-    // 2) ユーティリティ
-    // =========================
-    function escapeHtml(str) {
-      return String(str ?? '').replace(/[&<>"']/g, s => ({
-        '&':'&amp;',
-        '<':'&lt;',
-        '>':'&gt;',
-        '"':'&quot;',
-        "'":'&#39;'
-      }[s]));
+    function markerColor(category) {
+      if (category === "飲食") return "#ff7043";
+      if (category === "土産") return "#26a69a";
+      if (category === "トイレ") return "#42a5f5";
+      if (category === "注意") return "#ef5350";
+      return "#7e57c2";
     }
 
-    function escapeAttr(str) {
-      return String(str ?? '').replace(/"/g, '%22');
-    }
+    async function initMap() {
+      const center = { lat: 28.389, lng: 129.487 };
 
-    function toNumber(v) {
-      if (v == null) return null;
-      const s = String(v).trim();
-      if (!s) return null;
-      const n = Number(s);
-      return Number.isFinite(n) ? n : null;
-    }
-
-    function parseCSV(text) {
-      const rows = [];
-      let row = [];
-      let cur = '';
-      let inQuotes = false;
-
-      for (let i = 0; i < text.length; i++) {
-        const c = text[i];
-        const next = text[i + 1];
-
-        if (c === '"' && inQuotes && next === '"') {
-          cur += '"';
-          i++;
-          continue;
-        }
-        if (c === '"') {
-          inQuotes = !inQuotes;
-          continue;
-        }
-        if (c === ',' && !inQuotes) {
-          row.push(cur);
-          cur = '';
-          continue;
-        }
-        if ((c === '\n' || c === '\r') && !inQuotes) {
-          if (cur.length || row.length) {
-            row.push(cur);
-            rows.push(row);
-            row = [];
-            cur = '';
-          }
-          continue;
-        }
-        cur += c;
-      }
-
-      if (cur.length || row.length) {
-        row.push(cur);
-        rows.push(row);
-      }
-
-      return rows;
-    }
-
-    function pickKey(headers, candidates) {
-      const lower = headers.map(h => (h || '').toString().trim().toLowerCase());
-      for (const cand of candidates) {
-        const idx = lower.indexOf(cand.toLowerCase());
-        if (idx >= 0) return headers[idx];
-      }
-      return null;
-    }
-
-    function sleep(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    // =========================
-    // 3) 住所 → 緯度経度（キャッシュ付き）
-    // =========================
-    const GEO_CACHE_KEY = 'amami_geocode_cache_v2';
-    const geoCache = (() => {
-      try {
-        return JSON.parse(localStorage.getItem(GEO_CACHE_KEY) || '{}');
-      } catch {
-        return {};
-      }
-    })();
-
-    function saveGeoCache() {
-      try {
-        localStorage.setItem(GEO_CACHE_KEY, JSON.stringify(geoCache));
-      } catch {}
-    }
-
-    async function geocodeAddress(address) {
-      const raw = String(address || '').trim();
-      if (!raw) return null;
-
-      // 郵便番号や〒を除去
-      const cleaned = raw
-        .replace(/〒\s*\d{3}-?\d{4}/g, '')
-        .replace(/\s+/g, ' ')
-        .trim();
-
-      // 日本を足して検索しやすくする
-      const query = `${cleaned}, Japan`;
-
-      if (geoCache[query]) {
-        return geoCache[query];
-      }
-
-      const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(query);
-
-      // 連打回避
-      await sleep(1100);
-
-      console.log('geocode query:', query);
-
-      const res = await fetch(url, {
-        headers: {
-          'Accept': 'application/json'
-        }
+      map = new google.maps.Map(document.getElementById("map"), {
+        center,
+        zoom: 15,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: true
       });
 
-      if (!res.ok) {
-        console.warn('geocode fetch failed:', query, res.status);
-        return null;
-      }
+      infoWindow = new google.maps.InfoWindow();
 
-      const json = await res.json();
-      console.log('geocode result:', query, json);
+      document.getElementById("openSelfBtn").href = window.location.href;
 
-      if (!json || !json[0]) {
-        return null;
-      }
+      const bounds = new google.maps.LatLngBounds();
 
-      const lat = Number(json[0].lat);
-      const lng = Number(json[0].lon);
-
-      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-        return null;
-      }
-
-      geoCache[query] = { lat, lng };
-      saveGeoCache();
-
-      return geoCache[query];
-    }
-
-    // =========================
-    // 4) CSVからピン追加
-    // =========================
-    async function addMarkersFromCSV(url, layer, color, sourceName) {
-      const res = await fetch(url, { cache: 'no-store' });
-
-      if (!res.ok) {
-        console.warn('CSV fetch failed:', url, res.status);
-        return;
-      }
-
-      const text = await res.text();
-      const rows = parseCSV(text);
-
-      console.log(`[${sourceName}] rows raw:`, rows);
-
-      if (rows.length < 2) {
-        console.warn(`[${sourceName}] rows.length < 2`, rows);
-        return;
-      }
-
-      const headers = rows[0].map(h => (h || '').trim());
-      const dataRows = rows.slice(1);
-
-      console.log(`[${sourceName}] headers:`, headers);
-      console.log(`[${sourceName}] dataRows count:`, dataRows.length);
-
-      const titleKey   = pickKey(headers, ['title', 'name', '店名', '名称', 'スポット名']);
-      const addressKey = pickKey(headers, ['address', '住所']);
-      const descKey    = pickKey(headers, ['description', 'desc', '説明', 'メモ', '備考', '詳細']);
-      const otherKey   = pickKey(headers, ['other', 'その他']);
-      const latKey     = pickKey(headers, ['lat', 'latitude', '緯度']);
-      const lngKey     = pickKey(headers, ['lng', 'lon', 'longitude', '経度']);
-
-      console.log(`[${sourceName}] titleKey=${titleKey}, addressKey=${addressKey}, descKey=${descKey}, otherKey=${otherKey}, latKey=${latKey}, lngKey=${lngKey}`);
-
-      const idx = {};
-      headers.forEach((h, i) => {
-        idx[h] = i;
-      });
-
-      let success = 0;
-      let failed = 0;
-
-      for (const cols of dataRows) {
-        const title   = titleKey   ? (cols[idx[titleKey]] || '').trim() : '';
-        const address = addressKey ? (cols[idx[addressKey]] || '').trim() : '';
-        const desc    = descKey    ? (cols[idx[descKey]] || '').trim() : '';
-        const other   = otherKey   ? (cols[idx[otherKey]] || '').trim() : '';
-
-        console.log(`[${sourceName}] row:`, { title, address, desc, other });
-
-        let lat = latKey ? toNumber(cols[idx[latKey]]) : null;
-        let lng = lngKey ? toNumber(cols[idx[lngKey]]) : null;
-
-        if (lat == null || lng == null) {
-          const geo = await geocodeAddress(address);
-          if (!geo) {
-            console.warn(`[${sourceName}] geocode failed:`, address);
-            failed++;
-            continue;
+      spots.forEach((spot) => {
+        const marker = new google.maps.Marker({
+          position: { lat: spot.lat, lng: spot.lng },
+          map,
+          title: spot.title,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 9,
+            fillColor: markerColor(spot.category),
+            fillOpacity: 1,
+            strokeColor: "#ffffff",
+            strokeWeight: 2
           }
-          lat = geo.lat;
-          lng = geo.lng;
-        }
-
-        const marker = L.circleMarker([lat, lng], {
-          radius: 8,
-          color,
-          fillColor: color,
-          fillOpacity: 0.9,
-          weight: 2
         });
 
-        const safeTitle = title ? `<div style="font-weight:700;margin-bottom:6px;">${escapeHtml(title)}</div>` : '';
-        const safeOther = other ? `<div style="margin-bottom:6px;color:#444;">${escapeHtml(other)}</div>` : '';
-        const safeDesc  = desc ? `<div style="margin-bottom:8px;white-space:pre-wrap;">${escapeHtml(desc)}</div>` : '';
-        const safeAddr  = address ? `<div style="margin-bottom:8px;color:#666;white-space:pre-wrap;">${escapeHtml(address)}</div>` : '';
+        const navUrl =
+          `https://www.google.com/maps/dir/?api=1&origin=Current+Location&destination=${spot.lat},${spot.lng}&travelmode=walking`;
 
-        const gmapSearch = address
-          ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
-          : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(title)}`;
+        marker.addListener("click", () => {
+          infoWindow.setContent(`
+            <div style="max-width:240px;">
+              <div style="font-weight:700; margin-bottom:6px;">${spot.title}</div>
+              <div style="margin-bottom:6px; color:#666;">カテゴリ：${spot.category}</div>
+              <div style="white-space:pre-wrap; margin-bottom:8px;">${spot.description}</div>
+              <a href="${navUrl}" target="_blank" rel="noopener">現在地から案内</a>
+            </div>
+          `);
+          infoWindow.open(map, marker);
+        });
 
-        const navUrl = `https://www.google.com/maps/dir/?api=1&origin=Current+Location&destination=${lat},${lng}&travelmode=walking`;
+        bounds.extend(marker.getPosition());
+      });
 
-        const links = `
-          <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <a href="${escapeAttr(gmapSearch)}" target="_blank" rel="noopener">Googleマップで開く</a>
-            <a href="${navUrl}" target="_blank" rel="noopener">現在地から案内</a>
-          </div>
-          <div style="margin-top:6px;color:#999;font-size:11px;">(${escapeHtml(sourceName)})</div>
-        `;
-
-        marker.bindPopup(`${safeTitle}${safeOther}${safeDesc}${safeAddr}${links}`);
-        marker.addTo(layer);
-        success++;
+      if (spots.length > 0) {
+        map.fitBounds(bounds);
       }
 
-      console.log(`[${sourceName}] success=${success}, failed=${failed}`);
+      document.getElementById("status").textContent = "地図を表示しました。";
     }
 
-    // =========================
-    // 5) レイヤー作成＆実行
-    // =========================
-    const poiLayers = {};
+    document.addEventListener("click", (e) => {
+      if (e.target && e.target.id === "locateBtn") {
+        const status = document.getElementById("status");
 
-    CSV_SOURCES.forEach(src => {
-      poiLayers[src.name] = L.layerGroup().addTo(map);
-    });
-
-    L.control.layers(null, poiLayers, { collapsed: true }).addTo(map);
-
-    (async () => {
-      try {
-        statusEl.textContent = 'スポット情報を読み込んでいます…（初回は少し時間がかかります）';
-        for (const src of CSV_SOURCES) {
-          await addMarkersFromCSV(src.url, poiLayers[src.name], src.color, src.name);
+        if (!navigator.geolocation) {
+          status.textContent = "この端末は位置情報に対応していません。";
+          return;
         }
-        statusEl.textContent = '📍「現在地を表示」を押してください。';
-      } catch (e) {
-        console.error(e);
-        statusEl.textContent = 'スポット情報の読み込みでエラーが発生しました。';
+
+        status.textContent = "位置情報を取得しています…（許可が出たら「許可」）";
+
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            const accuracy = pos.coords.accuracy || 0;
+
+            if (currentMarker) currentMarker.setMap(null);
+            if (currentCircle) currentCircle.setMap(null);
+
+            currentMarker = new google.maps.Marker({
+              position: { lat, lng },
+              map,
+              title: "現在地",
+              icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 10,
+                fillColor: "#1a73e8",
+                fillOpacity: 1,
+                strokeColor: "#ffffff",
+                strokeWeight: 2
+              }
+            });
+
+            currentCircle = new google.maps.Circle({
+              strokeColor: "#1a73e8",
+              strokeOpacity: 0.8,
+              strokeWeight: 1,
+              fillColor: "#1a73e8",
+              fillOpacity: 0.12,
+              map,
+              center: { lat, lng },
+              radius: accuracy
+            });
+
+            map.setCenter({ lat, lng });
+            map.setZoom(16);
+
+            status.textContent = `現在地を表示しました（精度目安: 約 ${Math.round(accuracy)}m）`;
+          },
+          (err) => {
+            status.textContent = `位置情報を取得できません：${err.message}`;
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 12000,
+            maximumAge: 0
+          }
+        );
       }
-    })();
+    });
+  </script>
+
+  <script
+    async
+    defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCiCKmzzH7RvOoWiM9BBNONUBbvOWoKShI&callback=initMap">
   </script>
 </body>
 </html>
