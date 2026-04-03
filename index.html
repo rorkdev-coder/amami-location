@@ -78,24 +78,27 @@
         lat: 28.392135308080416,
         lng: 129.48924318258508,
         title: "観光案内の想定地点",
-        category: "案内",
+        category: "観光案内",
         description: "サンプル地点です"
       },
       {
         lat: 28.3912,
         lng: 129.4877,
         title: "飲食店サンプル",
-        category: "飲食",
+        category: "飲食店",
         description: "クルーズ客歓迎"
       }
     ];
 
-    function markerColor(category) {
-      if (category === "飲食") return "#ff7043";
-      if (category === "土産") return "#26a69a";
-      if (category === "トイレ") return "#42a5f5";
-      if (category === "注意") return "#ef5350";
-      return "#7e57c2";
+    function markerStyle(category) {
+      if (category === "飲食店") return { color: "#ff7043", icon: "🍴" };
+      if (category === "土産物屋") return { color: "#42a5f5", icon: "🛍️" };
+      if (category === "トイレ") return { color: "#29b6f6", icon: "🚻" };
+      if (category === "観光案内") return { color: "#7e57c2", icon: "ℹ️" };
+      if (category === "注意") return { color: "#ef5350", icon: "⚠️" };
+      if (category === "病院") return { color: "#66bb6a", icon: "✚" };
+      if (category === "港") return { color: "#3949ab", icon: "⚓" };
+      return { color: "#8d6e63", icon: "📍" };
     }
 
     async function initMap() {
@@ -110,59 +113,33 @@
       });
 
       infoWindow = new google.maps.InfoWindow();
-
       document.getElementById("openSelfBtn").href = window.location.href;
 
       const bounds = new google.maps.LatLngBounds();
 
       spots.forEach((spot) => {
-        function markerStyle(category) {
-  if (category === "飲食店") {
-    return { color: "#ff7043", icon: "🍴" };
-  }
-  if (category === "土産物屋") {
-    return { color: "#42a5f5", icon: "🛍️" };
-  }
-  if (category === "トイレ") {
-    return { color: "#29b6f6", icon: "🚻" };
-  }
-  if (category === "観光案内") {
-    return { color: "#7e57c2", icon: "ℹ️" };
-  }
-  if (category === "注意") {
-    return { color: "#ef5350", icon: "⚠️" };
-  }
-  if (category === "病院") {
-    return { color: "#66bb6a", icon: "✚" };
-  }
-  if (category === "港") {
-    return { color: "#3949ab", icon: "⚓" };
-  }
-  return { color: "#8d6e63", icon: "📍" };
-}
+        const style = markerStyle(spot.category);
 
-const style = markerStyle(spot.category);
+        const markerEl = document.createElement("div");
+        markerEl.style.width = "36px";
+        markerEl.style.height = "36px";
+        markerEl.style.borderRadius = "50%";
+        markerEl.style.background = style.color;
+        markerEl.style.display = "flex";
+        markerEl.style.alignItems = "center";
+        markerEl.style.justifyContent = "center";
+        markerEl.style.color = "#fff";
+        markerEl.style.fontSize = "18px";
+        markerEl.style.border = "2px solid white";
+        markerEl.style.boxShadow = "0 2px 6px rgba(0,0,0,0.25)";
+        markerEl.textContent = style.icon;
 
-const markerEl = document.createElement("div");
-markerEl.style.width = "36px";
-markerEl.style.height = "36px";
-markerEl.style.borderRadius = "50%";
-markerEl.style.background = style.color;
-markerEl.style.display = "flex";
-markerEl.style.alignItems = "center";
-markerEl.style.justifyContent = "center";
-markerEl.style.color = "#fff";
-markerEl.style.fontSize = "18px";
-markerEl.style.border = "2px solid white";
-markerEl.style.boxShadow = "0 2px 6px rgba(0,0,0,0.25)";
-markerEl.textContent = style.icon;
-
-const marker = new google.maps.marker.AdvancedMarkerElement({
-  map,
-  position: { lat: spot.lat, lng: spot.lng },
-  title: spot.title,
-  content: markerEl
-});
+        const marker = new google.maps.marker.AdvancedMarkerElement({
+          map,
+          position: { lat: spot.lat, lng: spot.lng },
+          title: spot.title,
+          content: markerEl
+        });
 
         const navUrl =
           `https://www.google.com/maps/dir/?api=1&origin=Current+Location&destination=${spot.lat},${spot.lng}&travelmode=walking`;
@@ -176,10 +153,13 @@ const marker = new google.maps.marker.AdvancedMarkerElement({
               <a href="${navUrl}" target="_blank" rel="noopener">現在地から案内</a>
             </div>
           `);
-          infoWindow.open(map, marker);
+          infoWindow.open({
+            anchor: marker,
+            map
+          });
         });
 
-        bounds.extend(marker.getPosition());
+        bounds.extend({ lat: spot.lat, lng: spot.lng });
       });
 
       if (spots.length > 0) {
@@ -255,7 +235,7 @@ const marker = new google.maps.marker.AdvancedMarkerElement({
   <script
     async
     defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCiCKmzzH7RvOoWiM9BBNONUBbvOWoKShI&libraries=marker&callback=initMap">
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC8dHUikjdSAExARQfT8r0yadFN2O5mRFc&libraries=marker&callback=initMap">
   </script>
 </body>
 </html>
