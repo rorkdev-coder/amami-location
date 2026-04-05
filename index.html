@@ -71,43 +71,118 @@
     let currentMarker = null;
     let currentCircle = null;
 
-    // ▼まずは固定データでテスト
-    // 後でここをスプレッドシート連携に置き換えられます
     const spots = [
       {
-        lat: 28.387954640773568,
-        lng: 129.4853607002732,
-        title: "ハブ出没注意（仮）",
-        category: "注意",
-        description: "ハブの発生情報あり\n通行時に注意してください"
-      },
-      {
-        lat: 28.392135308080416,
-        lng: 129.48924318258508,
-        title: "観光案内所",
-        category: "観光案内",
-        description: "観光案内はこちら"
-      },
-      {
-        lat: 28.3912,
-        lng: 129.4877,
-        title: "飲食店サンプル",
+        lat: 28.393219,
+        lng: 129.494406,
+        title: "美波すし",
         category: "飲食店",
-        description: "クルーズ客歓迎"
+        description: "TEL 0997526367\n営業時間 10:00〜22:00\n定休日 日曜\n決済方法 現金/楽天ペイ\n\nクルーズ客大歓迎"
       },
       {
-        lat: 28.3904,
-        lng: 129.4906,
-        title: "土産物屋サンプル",
-        category: "土産物屋",
-        description: "お土産はこちら"
+        lat: 28.389171,
+        lng: 129.494046,
+        title: "港湾食堂",
+        category: "飲食店",
+        description: "TEL 0997693130\n営業時間 （平日）11:00〜14:00 17:00〜19:30 （土日）6:00〜14:00 17:00〜19:30\n定休日 日曜\n決済方法 確認中\n\nいつでも来てね"
       },
       {
-        lat: 28.3909,
-        lng: 129.4866,
-        title: "トイレサンプル",
-        category: "トイレ",
-        description: "公衆トイレ"
+        lat: 28.382624,
+        lng: 129.493214,
+        title: "麺屋くろべえ",
+        category: "飲食店",
+        description: "TEL 0997532677\n営業時間 （平日）11:00〜14:00 17:00〜19:30 （土日）6:00〜14:00 17:00〜19:30\n定休日 日曜\n決済方法 確認中\n\n現金のみです"
+      },
+      {
+        lat: 28.382699,
+        lng: 129.492764,
+        title: "みちょれ市場",
+        category: "飲食店",
+        description: "任意のコメントを記載できます"
+      },
+      {
+        lat: 28.382725,
+        lng: 129.493839,
+        title: "WA・CAFE",
+        category: "飲食店",
+        description: "任意のコメントを記載できます"
+      },
+      {
+        lat: 28.387063,
+        lng: 129.502632,
+        title: "すし まんてん 小浜店",
+        category: "飲食店",
+        description: "任意のコメントを記載できます"
+      },
+      {
+        lat: 28.394240,
+        lng: 129.494852,
+        title: "ジョイフル 奄美長浜店",
+        category: "飲食店",
+        description: "任意のコメントを記載できます"
+      },
+      {
+        lat: 28.394115,
+        lng: 129.494824,
+        title: "オリバーズカフェ",
+        category: "飲食店",
+        description: "任意のコメントを記載できます"
+      },
+      {
+        lat: 28.395843,
+        lng: 129.494141,
+        title: "ラーメンごっぱち家",
+        category: "飲食店",
+        description: "任意のコメントを記載できます"
+      },
+      {
+        lat: 28.395843,
+        lng: 129.494141,
+        title: "創作キッチン檸檬",
+        category: "飲食店",
+        description: "任意のコメントを記載できます"
+      },
+      {
+        lat: 28.394090,
+        lng: 129.494435,
+        title: "八百千",
+        category: "飲食店",
+        description: "任意のコメントを記載できます"
+      },
+      {
+        lat: 28.392143,
+        lng: 129.494538,
+        title: "奥商店",
+        category: "飲食店",
+        description: "任意のコメントを記載できます"
+      },
+      {
+        lat: 28.396573,
+        lng: 129.494860,
+        title: "郷土料理 レストラン あさばな 奄美",
+        category: "飲食店",
+        description: "任意のコメントを記載できます"
+      },
+      {
+        lat: 28.394776,
+        lng: 129.494527,
+        title: "おむすび屋長浜店",
+        category: "飲食店",
+        description: "任意のコメントを記載できます"
+      },
+      {
+        lat: 28.396262,
+        lng: 129.493407,
+        title: "あんだぎや",
+        category: "飲食店",
+        description: "任意のコメントを記載できます"
+      },
+      {
+        lat: 28.394300,
+        lng: 129.494480,
+        title: "Sucre sucré（シュクレシュクレ）",
+        category: "飲食店",
+        description: "任意のコメントを記載できます"
       }
     ];
 
@@ -151,7 +226,7 @@
         mapTypeControl: false,
         streetViewControl: false,
         fullscreenControl: true,
-        mapId: "ef633c769a15ea5f5f112602"
+        mapId: "YOUR_MAP_ID"
       });
 
       infoWindow = new google.maps.InfoWindow();
@@ -262,7 +337,7 @@
   <script
     async
     defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC8dHUikjdSAExARQfT8r0yadFN2O5mRFc&libraries=marker&callback=initMap">
+    src="https://maps.googleapis.com/maps/api/js?key=YOUR_NEW_API_KEY&libraries=marker&callback=initMap">
   </script>
 </body>
 </html>
