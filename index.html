@@ -10,10 +10,12 @@
       height: 100%;
       font-family: Arial, sans-serif;
     }
+
     #map {
       width: 100%;
       height: 100vh;
     }
+
     .controls {
       position: absolute;
       top: 12px;
@@ -23,6 +25,7 @@
       gap: 8px;
       flex-wrap: wrap;
     }
+
     .btn {
       padding: 10px 12px;
       border: 1px solid #ddd;
@@ -35,6 +38,7 @@
       color: #000;
       display: inline-block;
     }
+
     .status {
       position: absolute;
       left: 12px;
@@ -48,6 +52,7 @@
       font-size: 12px;
       line-height: 1.4;
       box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+      white-space: pre-wrap;
     }
   </style>
 </head>
@@ -66,6 +71,8 @@
     let currentMarker = null;
     let currentCircle = null;
 
+    // ▼まずは固定データでテスト
+    // 後でここをスプレッドシート連携に置き換えられます
     const spots = [
       {
         lat: 28.387954640773568,
@@ -77,9 +84,9 @@
       {
         lat: 28.392135308080416,
         lng: 129.48924318258508,
-        title: "観光案内の想定地点",
+        title: "観光案内所",
         category: "観光案内",
-        description: "サンプル地点です"
+        description: "観光案内はこちら"
       },
       {
         lat: 28.3912,
@@ -87,6 +94,20 @@
         title: "飲食店サンプル",
         category: "飲食店",
         description: "クルーズ客歓迎"
+      },
+      {
+        lat: 28.3904,
+        lng: 129.4906,
+        title: "土産物屋サンプル",
+        category: "土産物屋",
+        description: "お土産はこちら"
+      },
+      {
+        lat: 28.3909,
+        lng: 129.4866,
+        title: "トイレサンプル",
+        category: "トイレ",
+        description: "公衆トイレ"
       }
     ];
 
@@ -101,6 +122,26 @@
       return { color: "#8d6e63", icon: "📍" };
     }
 
+    function createMarkerElement(category) {
+      const style = markerStyle(category);
+
+      const markerEl = document.createElement("div");
+      markerEl.style.width = "36px";
+      markerEl.style.height = "36px";
+      markerEl.style.borderRadius = "50%";
+      markerEl.style.background = style.color;
+      markerEl.style.display = "flex";
+      markerEl.style.alignItems = "center";
+      markerEl.style.justifyContent = "center";
+      markerEl.style.color = "#fff";
+      markerEl.style.fontSize = "18px";
+      markerEl.style.border = "2px solid white";
+      markerEl.style.boxShadow = "0 2px 6px rgba(0,0,0,0.25)";
+      markerEl.textContent = style.icon;
+
+      return markerEl;
+    }
+
     async function initMap() {
       const center = { lat: 28.389, lng: 129.487 };
 
@@ -109,7 +150,8 @@
         zoom: 15,
         mapTypeControl: false,
         streetViewControl: false,
-        fullscreenControl: true
+        fullscreenControl: true,
+        mapId: "ef633c769a15ea5f5f112602"
       });
 
       infoWindow = new google.maps.InfoWindow();
@@ -118,33 +160,17 @@
       const bounds = new google.maps.LatLngBounds();
 
       spots.forEach((spot) => {
-        const style = markerStyle(spot.category);
-
-        const markerEl = document.createElement("div");
-        markerEl.style.width = "36px";
-        markerEl.style.height = "36px";
-        markerEl.style.borderRadius = "50%";
-        markerEl.style.background = style.color;
-        markerEl.style.display = "flex";
-        markerEl.style.alignItems = "center";
-        markerEl.style.justifyContent = "center";
-        markerEl.style.color = "#fff";
-        markerEl.style.fontSize = "18px";
-        markerEl.style.border = "2px solid white";
-        markerEl.style.boxShadow = "0 2px 6px rgba(0,0,0,0.25)";
-        markerEl.textContent = style.icon;
-
         const marker = new google.maps.marker.AdvancedMarkerElement({
           map,
           position: { lat: spot.lat, lng: spot.lng },
           title: spot.title,
-          content: markerEl
+          content: createMarkerElement(spot.category)
         });
 
         const navUrl =
           `https://www.google.com/maps/dir/?api=1&origin=Current+Location&destination=${spot.lat},${spot.lng}&travelmode=walking`;
 
-        marker.addListener("click", () => {
+        marker.addEventListener("gmp-click", () => {
           infoWindow.setContent(`
             <div style="max-width:240px;">
               <div style="font-weight:700; margin-bottom:6px;">${spot.title}</div>
@@ -153,6 +179,7 @@
               <a href="${navUrl}" target="_blank" rel="noopener">現在地から案内</a>
             </div>
           `);
+
           infoWindow.open({
             anchor: marker,
             map
