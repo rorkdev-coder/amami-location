@@ -170,7 +170,7 @@
         const navUrl =
           `https://www.google.com/maps/dir/?api=1&origin=Current+Location&destination=${spot.lat},${spot.lng}&travelmode=walking`;
 
-        marker.addEventListener("gmp-click", () => {
+        marker.addListener("click", () => {
           infoWindow.setContent(`
             <div style="max-width:240px;">
               <div style="font-weight:700; margin-bottom:6px;">${spot.title}</div>
