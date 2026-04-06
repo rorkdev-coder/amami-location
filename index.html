@@ -65,17 +65,15 @@
   <div id="map"></div>
   <div class="status" id="status">地図を読み込んでいます…</div>
 
+  <!-- GTranslate -->
+  <div class="gtranslate_wrapper"></div>
+
   <script>
     let map;
     let infoWindow;
     let currentMarker = null;
     let currentCircle = null;
 
-    // =========================
-    // スポットデータ
-    // 飲食店と注意は座標入り
-    // お買い物・観光アトラクションは住所から初回変換
-    // =========================
     const spots = [
       // ===== 飲食店 =====
       {
@@ -104,102 +102,104 @@
         lng: 129.492764,
         title: "みちょれ市場",
         category: "飲食店",
-        description: "TEL 0997571811\n営業時間 ダミー\n定休日 ダミー\n決済方法 ダミー\n\n任意のコメントを記載できます"
+        description: "TEL 0997571811\n営業時間 11:00〜14:30（L.O.14:00）\n定休日 月曜・水曜・日曜\n決済方法 現金・クレジット・バーコード決済・電子マネー\n\n任意のコメントを記載できます"
       },
       {
         lat: 28.382725,
         lng: 129.493839,
         title: "WA・CAFE",
         category: "飲食店",
-        description: "TEL ダミー\n営業時間 ダミー\n定休日 ダミー\n決済方法 ダミー\n\n任意のコメントを記載できます"
+        description: "TEL 0997587573\n営業時間 11:00〜16:00\n定休日 火曜\n決済方法 現金・クレジット\n\n任意のコメントを記載できます"
       },
       {
         lat: 28.387063,
         lng: 129.502632,
         title: "すし まんてん 小浜店",
         category: "飲食店",
-        description: "TEL ダミー\n営業時間 ダミー\n定休日 ダミー\n決済方法 ダミー\n\n任意のコメントを記載できます"
+        description: "TEL 0997527166\n営業時間 11:00〜14:00 17:00〜21:30\n定休日 火曜\n決済方法 現金・クレジット・電子マネー\n\n任意のコメントを記載できます"
       },
       {
         lat: 28.394240,
         lng: 129.494852,
         title: "ジョイフル 奄美長浜店",
         category: "飲食店",
-        description: "TEL ダミー\n営業時間 ダミー\n定休日 ダミー\n決済方法 ダミー\n\n任意のコメントを記載できます"
+        description: "TEL 0997693882\n営業時間 24時間\n定休日 なし\n決済方法 現金・クレジット・電子マネー\n\n任意のコメントを記載できます"
       },
       {
         lat: 28.394115,
         lng: 129.494824,
         title: "オリバーズカフェ",
         category: "飲食店",
-        description: "TEL ダミー\n営業時間 ダミー\n定休日 ダミー\n決済方法 ダミー\n\n任意のコメントを記載できます"
+        description: "任意のコメントを記載できます"
       },
       {
         lat: 28.395843,
         lng: 129.494141,
         title: "ラーメンごっぱち家",
         category: "飲食店",
-        description: "TEL ダミー\n営業時間 ダミー\n定休日 ダミー\n決済方法 ダミー\n\n任意のコメントを記載できます"
+        description: "任意のコメントを記載できます"
       },
       {
         lat: 28.395843,
         lng: 129.494141,
         title: "創作キッチン檸檬",
         category: "飲食店",
-        description: "TEL ダミー\n営業時間 ダミー\n定休日 ダミー\n決済方法 ダミー\n\n任意のコメントを記載できます"
+        description: "任意のコメントを記載できます"
       },
       {
         lat: 28.394090,
         lng: 129.494435,
         title: "八百千",
         category: "飲食店",
-        description: "TEL ダミー\n営業時間 ダミー\n定休日 ダミー\n決済方法 ダミー\n\n任意のコメントを記載できます"
+        description: "任意のコメントを記載できます"
       },
       {
         lat: 28.392143,
         lng: 129.494538,
         title: "奥商店",
         category: "飲食店",
-        description: "TEL ダミー\n営業時間 ダミー\n定休日 ダミー\n決済方法 ダミー\n\n任意のコメントを記載できます"
+        description: "任意のコメントを記載できます"
       },
       {
         lat: 28.396573,
         lng: 129.494860,
         title: "郷土料理 レストラン あさばな 奄美",
         category: "飲食店",
-        description: "TEL ダミー\n営業時間 ダミー\n定休日 ダミー\n決済方法 ダミー\n\n任意のコメントを記載できます"
+        description: "任意のコメントを記載できます"
       },
       {
         lat: 28.394776,
         lng: 129.494527,
         title: "おむすび屋長浜店",
         category: "飲食店",
-        description: "TEL ダミー\n営業時間 ダミー\n定休日 ダミー\n決済方法 ダミー\n\n任意のコメントを記載できます"
+        description: "任意のコメントを記載できます"
       },
       {
         lat: 28.396262,
         lng: 129.493407,
         title: "あんだぎや",
         category: "飲食店",
-        description: "TEL ダミー\n営業時間 ダミー\n定休日 ダミー\n決済方法 ダミー\n\n任意のコメントを記載できます"
+        description: "任意のコメントを記載できます"
       },
       {
         lat: 28.394300,
         lng: 129.494480,
         title: "Sucre sucré（シュクレシュクレ）",
         category: "飲食店",
-        description: "TEL ダミー\n営業時間 ダミー\n定休日 ダミー\n決済方法 ダミー\n\n任意のコメントを記載できます"
+        description: "任意のコメントを記載できます"
       },
 
       // ===== お買い物 =====
       {
-        address: "〒894-0036 鹿児島県奄美市名瀬長浜町１８−１ 中村ビル 1F",
+        lat: 28.3946414,
+        lng: 129.49451912,
         title: "グリーンストア長浜店",
         category: "お買い物",
         description: "食料品\nTEL 0997524052\n営業時間 9:00〜21:30\n定休日 なし\n決済方法 確認中"
       },
       {
-        address: "〒894-0035 鹿児島県奄美市名瀬塩浜町４−１３",
+        lat: 28.386638,
+        lng: 129.493824,
         title: "ドラッグストア マツモトキヨシ 塩浜店",
         category: "お買い物",
         description: "薬品、日用品\nTEL 確認中\n営業時間 9:00〜24:00\n定休日 なし\n決済方法 確認中"
@@ -207,13 +207,15 @@
 
       // ===== 観光アトラクション =====
       {
-        address: "〒894-0036 鹿児島県奄美市名瀬長浜町５１７",
+        lat: 28.398404,
+        lng: 129.494464,
         title: "奄美博物館",
         category: "観光アトラクション",
         description: "TEL 0997541210\n営業時間 9:00〜17:00\n定休日 第3月曜日、年末年始（12/28～1/1）\n決済方法 確認中\n利用料金 大人310円 高校生・大学生150円 小中学生100円"
       },
       {
-        address: "〒894-0036 鹿児島県奄美市名瀬長浜町３−１５",
+        lat: 28.3905,
+        lng: 129.493571,
         title: "奄美観光ハブセンター",
         category: "観光アトラクション",
         description: "TEL 0997521505\n営業時間 9:00〜17:00\n定休日 なし\n決済方法 確認中\n利用料金 大人（高校生以上）500円 小人（小中学生）300円"
@@ -261,90 +263,15 @@
       return markerEl;
     }
 
-    // =========================
-    // 住所 → 緯度経度（初回のみ）
-    // =========================
-    const GEO_CACHE_KEY = "amami_geocode_cache_v3";
-    const geoCache = (() => {
-      try {
-        return JSON.parse(localStorage.getItem(GEO_CACHE_KEY) || "{}");
-      } catch {
-        return {};
-      }
-    })();
-
-    function saveGeoCache() {
-      try {
-        localStorage.setItem(GEO_CACHE_KEY, JSON.stringify(geoCache));
-      } catch {}
-    }
-
-    function sleep(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    async function geocodeAddress(address) {
-      const raw = String(address || "").trim();
-      if (!raw) return null;
-
-      const cleaned = raw
-        .replace(/〒\s*\d{3}-?\d{4}/g, "")
-        .replace(/\s+/g, " ")
-        .trim();
-
-      const query = `${cleaned}, Japan`;
-
-      if (geoCache[query]) {
-        return geoCache[query];
-      }
-
-      const url = "https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" + encodeURIComponent(query);
-
-      await sleep(1100);
-
-      const res = await fetch(url, {
-        headers: { "Accept": "application/json" }
-      });
-
-      if (!res.ok) return null;
-
-      const json = await res.json();
-      if (!json || !json[0]) return null;
-
-      const lat = Number(json[0].lat);
-      const lng = Number(json[0].lon);
-      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-
-      geoCache[query] = { lat, lng };
-      saveGeoCache();
-
-      return geoCache[query];
-    }
-
-    async function normalizeSpots(rawSpots) {
-      const result = [];
-
-      for (const spot of rawSpots) {
-        if (typeof spot.lat === "number" && typeof spot.lng === "number") {
-          result.push(spot);
-          continue;
-        }
-
-        if (spot.address) {
-          const geo = await geocodeAddress(spot.address);
-          if (geo) {
-            result.push({
-              ...spot,
-              lat: geo.lat,
-              lng: geo.lng
-            });
-          } else {
-            console.warn("geocode failed:", spot.title, spot.address);
-          }
-        }
-      }
-
-      return result;
+    function createCurrentLocationElement() {
+      const markerEl = document.createElement("div");
+      markerEl.style.width = "20px";
+      markerEl.style.height = "20px";
+      markerEl.style.borderRadius = "50%";
+      markerEl.style.background = "#1a73e8";
+      markerEl.style.border = "3px solid white";
+      markerEl.style.boxShadow = "0 2px 6px rgba(0,0,0,0.25)";
+      return markerEl;
     }
 
     async function initMap() {
@@ -362,12 +289,9 @@
       infoWindow = new google.maps.InfoWindow();
       document.getElementById("openSelfBtn").href = window.location.href;
 
-      document.getElementById("status").textContent = "スポット情報を読み込んでいます…（初回は少し時間がかかります）";
-
-      const normalizedSpots = await normalizeSpots(spots);
       const bounds = new google.maps.LatLngBounds();
 
-      normalizedSpots.forEach((spot) => {
+      spots.forEach((spot) => {
         const marker = new google.maps.marker.AdvancedMarkerElement({
           map,
           position: { lat: spot.lat, lng: spot.lng },
@@ -384,7 +308,6 @@
               <div style="font-weight:700; margin-bottom:6px;">${spot.title}</div>
               <div style="margin-bottom:6px; color:#666;">カテゴリ：${spot.category}</div>
               <div style="white-space:pre-wrap; margin-bottom:8px;">${spot.description}</div>
-              ${spot.address ? `<div style="font-size:12px; color:#666; margin-bottom:8px;">${spot.address}</div>` : ""}
               <a href="${navUrl}" target="_blank" rel="noopener">現在地から案内</a>
             </div>
           `);
@@ -398,11 +321,11 @@
         bounds.extend({ lat: spot.lat, lng: spot.lng });
       });
 
-      if (normalizedSpots.length > 0) {
+      if (spots.length > 0) {
         map.fitBounds(bounds);
       }
 
-      document.getElementById("status").textContent = `地図を表示しました。スポット数：${normalizedSpots.length}`;
+      document.getElementById("status").textContent = `地図を表示しました。スポット数：${spots.length}`;
     }
 
     document.addEventListener("click", (e) => {
@@ -422,21 +345,14 @@
             const lng = pos.coords.longitude;
             const accuracy = pos.coords.accuracy || 0;
 
-            if (currentMarker) currentMarker.setMap(null);
+            if (currentMarker) currentMarker.map = null;
             if (currentCircle) currentCircle.setMap(null);
 
-            currentMarker = new google.maps.Marker({
-              position: { lat, lng },
+            currentMarker = new google.maps.marker.AdvancedMarkerElement({
               map,
+              position: { lat, lng },
               title: "現在地",
-              icon: {
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: 10,
-                fillColor: "#1a73e8",
-                fillOpacity: 1,
-                strokeColor: "#ffffff",
-                strokeWeight: 2
-              }
+              content: createCurrentLocationElement()
             });
 
             currentCircle = new google.maps.Circle({
@@ -468,10 +384,21 @@
     });
   </script>
 
+  <script>
+    window.gtranslateSettings = {
+      default_language: "ja",
+      native_language_names: true,
+      detect_browser_language: true,
+      languages: ["ja","en","zh-CN","zh-TW"],
+      wrapper_selector: ".gtranslate_wrapper"
+    };
+  </script>
+
   <script
     async
     defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC8dHUikjdSAExARQfT8r0yadFN2O5mRFc&libraries=marker&callback=initMap">
   </script>
+  <script src="https://cdn.gtranslate.net/widgets/latest/float.js" defer></script>
 </body>
 </html>
