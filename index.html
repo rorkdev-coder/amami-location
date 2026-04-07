@@ -273,6 +273,20 @@
       return markerEl;
     }
 
+    function isEmbedded() {
+      return window.self !== window.top;
+    }
+
+    function autoOpenCurrentLocationIfNeeded() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("showCurrentLocation") === "1") {
+        const btn = document.getElementById("locateBtn");
+        if (btn) {
+          setTimeout(() => btn.click(), 500);
+        }
+      }
+    }
+
     async function initMap() {
       const center = { lat: 28.389, lng: 129.487 };
 
@@ -324,11 +338,19 @@
       }
 
       document.getElementById("status").textContent = `地図を表示しました。スポット数：${spots.length}`;
+      autoOpenCurrentLocationIfNeeded();
     }
 
     document.addEventListener("click", (e) => {
       if (e.target && e.target.id === "locateBtn") {
         const status = document.getElementById("status");
+
+        if (isEmbedded()) {
+          const url = new URL(window.location.href);
+          url.searchParams.set("showCurrentLocation", "1");
+          window.open(url.toString(), "_blank", "noopener,noreferrer");
+          return;
+        }
 
         if (!navigator.geolocation) {
           status.textContent = "この端末は位置情報に対応していません。";
