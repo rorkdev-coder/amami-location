@@ -71,6 +71,7 @@
     let infoWindow;
     let currentMarker = null;
     let currentCircle = null;
+    let resolvedSpots = [];
 
     const spots = [
       // ===== 飲食店 =====
@@ -247,6 +248,78 @@
         title: "ハブ出没注意（仮）",
         category: "注意",
         description: "ハブの発生情報あり\n通行時に注意してください"
+      },
+
+      // ===== トイレ（初回だけ住所→座標変換してキャッシュ） =====
+      {
+        id: "toilet-marine-town",
+        address: "鹿児島県奄美市名瀬矢之脇町2232番地",
+        title: "名瀬港マリンタウン緑地公園",
+        category: "トイレ",
+        description: "バリアフリー"
+      },
+      {
+        id: "toilet-familymart-minatocho",
+        address: "鹿児島県奄美市名瀬港町１１－１",
+        title: "FamilyMart名瀬港町店",
+        category: "トイレ",
+        description: "営業時間：確認中"
+      },
+      {
+        id: "toilet-fureai-park",
+        address: "鹿児島県奄美市名瀬幸町9-3",
+        title: "ふれ愛パーク",
+        category: "トイレ",
+        description: "第7回グッドトイレ10"
+      },
+      {
+        id: "toilet-amahome-plaza",
+        address: "鹿児島県奄美市名瀬柳町2番1号",
+        title: "アマホームPLAZA",
+        category: "トイレ",
+        description: "営業時間：9:00〜21:00"
+      },
+      {
+        id: "toilet-kaneku-park",
+        address: "鹿児島県奄美市名瀬金久町18番",
+        title: "かねく公園",
+        category: "トイレ",
+        description: "営業時間：確認中"
+      },
+      {
+        id: "toilet-aiai-hiroba",
+        address: "鹿児島県奄美市名瀬末広町14番10号",
+        title: "AiAiひろば",
+        category: "トイレ",
+        description: "営業時間：9:00〜20:00"
+      },
+      {
+        id: "toilet-hama-park",
+        address: "鹿児島県奄美市名瀬港町24-15",
+        title: "はま公園",
+        category: "トイレ",
+        description: "営業時間：確認中"
+      },
+      {
+        id: "toilet-gotenhama-park",
+        address: "鹿児島県奄美市名瀬小浜町地先",
+        title: "御殿浜公園",
+        category: "トイレ",
+        description: "営業時間：確認中"
+      },
+      {
+        id: "toilet-asahi-park",
+        address: "鹿児島県奄美市伊津部町18番",
+        title: "あさひ公園",
+        category: "トイレ",
+        description: "営業時間：確認中"
+      },
+      {
+        id: "toilet-aeon-plaza-oshima",
+        address: "鹿児島県奄美市名瀬小浜町23-1",
+        title: "イオン プラザ大島店",
+        category: "トイレ",
+        description: "営業時間：9:00〜23:00"
       }
     ];
 
@@ -264,7 +337,6 @@
 
     function createMarkerElement(category) {
       const style = markerStyle(category);
-
       const markerEl = document.createElement("div");
       markerEl.style.width = "36px";
       markerEl.style.height = "36px";
@@ -278,7 +350,6 @@
       markerEl.style.border = "2px solid white";
       markerEl.style.boxShadow = "0 2px 6px rgba(0,0,0,0.25)";
       markerEl.textContent = style.icon;
-
       return markerEl;
     }
 
@@ -307,11 +378,83 @@
       return params.get("showCurrentLocation") === "1";
     }
 
+    const GEO_CACHE_KEY = "amami_google_geocode_cache_v1";
+
+    function getGeoCache() {
+      try {
+        return JSON.parse(localStorage.getItem(GEO_CACHE_KEY) || "{}");
+      } catch {
+        return {};
+      }
+    }
+
+    function saveGeoCache(cache) {
+      try {
+        localStorage.setItem(GEO_CACHE_KEY, JSON.stringify(cache));
+      } catch {}
+    }
+
+    function geocodeWithGoogle(geocoder, address) {
+      return new Promise((resolve) => {
+        geocoder.geocode({ address }, (results, status) => {
+          if (status === "OK" && results && results[0]) {
+            const loc = results[0].geometry.location;
+            resolve({
+              lat: loc.lat(),
+              lng: loc.lng()
+            });
+          } else {
+            resolve(null);
+          }
+        });
+      });
+    }
+
+    async function normalizeSpots(rawSpots) {
+      const geocoder = new google.maps.Geocoder();
+      const cache = getGeoCache();
+      const output = [];
+
+      for (const spot of rawSpots) {
+        if (typeof spot.lat === "number" && typeof spot.lng === "number") {
+          output.push(spot);
+          continue;
+        }
+
+        if (!spot.address) continue;
+
+        const cacheKey = spot.address.trim();
+        if (cache[cacheKey]) {
+          output.push({
+            ...spot,
+            lat: cache[cacheKey].lat,
+            lng: cache[cacheKey].lng
+          });
+          continue;
+        }
+
+        const geo = await geocodeWithGoogle(geocoder, spot.address);
+        if (geo) {
+          cache[cacheKey] = geo;
+          output.push({
+            ...spot,
+            lat: geo.lat,
+            lng: geo.lng
+          });
+        } else {
+          console.warn("geocode failed:", spot.title, spot.address);
+        }
+      }
+
+      saveGeoCache(cache);
+      return output;
+    }
+
     function focusSpotIfNeeded() {
       const spotId = getSpotFromQuery();
       if (!spotId) return;
 
-      const target = spots.find(s => s.id === spotId);
+      const target = resolvedSpots.find(s => s.id === spotId);
       if (!target) return;
 
       map.setCenter({ lat: target.lat, lng: target.lng });
@@ -340,10 +483,13 @@
       });
 
       infoWindow = new google.maps.InfoWindow();
+      document.getElementById("status").textContent = "地図を読み込んでいます…（初回はトイレ情報の変換に少し時間がかかることがあります）";
+
+      resolvedSpots = await normalizeSpots(spots);
 
       const bounds = new google.maps.LatLngBounds();
 
-      spots.forEach((spot) => {
+      resolvedSpots.forEach((spot) => {
         const marker = new google.maps.marker.AdvancedMarkerElement({
           map,
           position: { lat: spot.lat, lng: spot.lng },
@@ -359,7 +505,8 @@
             <div style="max-width:240px;">
               <div style="font-weight:700; margin-bottom:6px;">${spot.title}</div>
               <div style="margin-bottom:6px; color:#666;">カテゴリ：${spot.category}</div>
-              <div style="white-space:pre-wrap; margin-bottom:8px;">${spot.description}</div>
+              <div style="white-space:pre-wrap; margin-bottom:8px;">${spot.description || ""}</div>
+              ${spot.address ? `<div style="font-size:12px; color:#666; margin-bottom:8px;">${spot.address}</div>` : ""}
               <a href="${navUrl}" target="_blank" rel="noopener">現在地から案内</a>
             </div>
           `);
@@ -373,14 +520,14 @@
         bounds.extend({ lat: spot.lat, lng: spot.lng });
       });
 
-      if (spots.length > 0 && !getSpotFromQuery()) {
+      if (resolvedSpots.length > 0 && !getSpotFromQuery()) {
         map.fitBounds(bounds);
       }
 
       if (getSpotFromQuery()) {
         focusSpotIfNeeded();
       } else {
-        document.getElementById("status").textContent = `地図を表示しました。スポット数：${spots.length}`;
+        document.getElementById("status").textContent = `地図を表示しました。スポット数：${resolvedSpots.length}`;
       }
 
       autoOpenCurrentLocationIfNeeded();
