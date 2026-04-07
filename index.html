@@ -64,7 +64,6 @@
   <div id="map"></div>
   <div class="status" id="status">地図を読み込んでいます…</div>
 
-  <!-- GTranslate -->
   <div class="gtranslate_wrapper"></div>
 
   <script>
@@ -74,13 +73,14 @@
     let currentCircle = null;
 
     const spots = [
+      // ===== 飲食店 =====
       {
         id: "minami-sushi",
         lat: 28.393219,
         lng: 129.494406,
         title: "美波すし",
         category: "飲食店",
-        description: "TEL 0997526367\n営業時間 10:00〜22:00\n定休日 日曜\n決済方法 現金/楽天ペイ\n\nクルーズ客大歓迎"
+        description: "営業時間：10:00〜22:00\n定休日：日曜\n決済方法：現金 / 楽天ペイ\nTEL：0997526367\n\nクルーズ客大歓迎"
       },
       {
         id: "kouwan-shokudo",
@@ -88,15 +88,165 @@
         lng: 129.494046,
         title: "港湾食堂",
         category: "飲食店",
-        description: "TEL 0997693130\n営業時間 （平日）11:00〜14:00 17:00〜19:30 （土日）6:00〜14:00 17:00〜19:30\n定休日 日曜\n決済方法 確認中\n\nいつでも来てね"
+        description: "営業時間：（平日）11:00〜14:00 / 17:00〜19:30\n（土日）6:00〜14:00 / 17:00〜19:30\n定休日：日曜\n決済方法：確認中\nTEL：0997693130\n\nいつでも来てね"
       },
+      {
+        id: "menya-kurobee",
+        lat: 28.382624,
+        lng: 129.493214,
+        title: "麺屋くろべえ",
+        category: "飲食店",
+        description: "営業時間：（平日）11:00〜14:00 / 17:00〜19:30\n（土日）6:00〜14:00 / 17:00〜19:30\n定休日：日曜\n決済方法：確認中\nTEL：0997532677\n\n現金のみです"
+      },
+      {
+        id: "michore-ichiba",
+        lat: 28.382699,
+        lng: 129.492764,
+        title: "みちょれ市場",
+        category: "飲食店",
+        description: "営業時間：11:00〜14:30（L.O.14:00）\n定休日：月曜・水曜・日曜\n決済方法：現金・クレジット・バーコード決済・電子マネー\nTEL：0997571811"
+      },
+      {
+        id: "wa-cafe",
+        lat: 28.382725,
+        lng: 129.493839,
+        title: "WA・CAFE",
+        category: "飲食店",
+        description: "営業時間：11:00〜16:00\n定休日：火曜\n決済方法：現金・クレジット\nTEL：0997587573"
+      },
+      {
+        id: "sushi-manten-obama",
+        lat: 28.387063,
+        lng: 129.502632,
+        title: "すし まんてん 小浜店",
+        category: "飲食店",
+        description: "営業時間：11:00〜14:00 / 17:00〜21:30\n定休日：火曜\n決済方法：現金・クレジット・電子マネー\nTEL：0997527166"
+      },
+      {
+        id: "joyfull-nagahama",
+        lat: 28.394240,
+        lng: 129.494852,
+        title: "ジョイフル 奄美長浜店",
+        category: "飲食店",
+        description: "営業時間：24時間\n定休日：なし\n決済方法：現金・クレジット・電子マネー\nTEL：0997693882"
+      },
+      {
+        id: "olivers-cafe",
+        lat: 28.394115,
+        lng: 129.494824,
+        title: "オリバーズカフェ",
+        category: "飲食店",
+        description: "営業時間：確認中\n定休日：確認中\n決済方法：確認中"
+      },
+      {
+        id: "ramen-goppachiya",
+        lat: 28.395843,
+        lng: 129.494141,
+        title: "ラーメンごっぱち家",
+        category: "飲食店",
+        description: "営業時間：確認中\n定休日：確認中\n決済方法：確認中"
+      },
+      {
+        id: "sousaku-kitchen-lemon",
+        lat: 28.395843,
+        lng: 129.494141,
+        title: "創作キッチン檸檬",
+        category: "飲食店",
+        description: "営業時間：確認中\n定休日：確認中\n決済方法：確認中"
+      },
+      {
+        id: "yaosen",
+        lat: 28.394090,
+        lng: 129.494435,
+        title: "八百千",
+        category: "飲食店",
+        description: "営業時間：確認中\n定休日：確認中\n決済方法：確認中"
+      },
+      {
+        id: "oku-shoten",
+        lat: 28.392143,
+        lng: 129.494538,
+        title: "奥商店",
+        category: "飲食店",
+        description: "営業時間：確認中\n定休日：確認中\n決済方法：確認中"
+      },
+      {
+        id: "asabana-amami",
+        lat: 28.396573,
+        lng: 129.494860,
+        title: "郷土料理 レストラン あさばな 奄美",
+        category: "飲食店",
+        description: "営業時間：確認中\n定休日：確認中\n決済方法：確認中"
+      },
+      {
+        id: "omusubiya-nagahama",
+        lat: 28.394776,
+        lng: 129.494527,
+        title: "おむすび屋長浜店",
+        category: "飲食店",
+        description: "営業時間：確認中\n定休日：確認中\n決済方法：確認中"
+      },
+      {
+        id: "andagiya",
+        lat: 28.396262,
+        lng: 129.493407,
+        title: "あんだぎや",
+        category: "飲食店",
+        description: "営業時間：確認中\n定休日：確認中\n決済方法：確認中"
+      },
+      {
+        id: "sucre-sucre",
+        lat: 28.394300,
+        lng: 129.494480,
+        title: "Sucre sucré（シュクレシュクレ）",
+        category: "飲食店",
+        description: "営業時間：確認中\n定休日：確認中\n決済方法：確認中"
+      },
+
+      // ===== お買い物 =====
+      {
+        id: "green-store-nagahama",
+        lat: 28.3946414,
+        lng: 129.49451912,
+        title: "グリーンストア長浜店",
+        category: "お買い物",
+        description: "食料品\n営業時間：9:00〜21:30\n定休日：なし\n決済方法：確認中\nTEL：0997524052"
+      },
+      {
+        id: "matsukiyo-shiohama",
+        lat: 28.386638,
+        lng: 129.493824,
+        title: "ドラッグストア マツモトキヨシ 塩浜店",
+        category: "お買い物",
+        description: "薬品・日用品\n営業時間：9:00〜24:00\n定休日：なし\n決済方法：確認中\nTEL：確認中"
+      },
+
+      // ===== 観光アトラクション =====
       {
         id: "amami-museum",
         lat: 28.398404,
         lng: 129.494464,
         title: "奄美博物館",
         category: "観光アトラクション",
-        description: "TEL 0997541210\n営業時間 9:00〜17:00\n定休日 第3月曜日、年末年始（12/28～1/1）\n決済方法 確認中\n利用料金 大人310円 高校生・大学生150円 小中学生100円"
+        description: "営業時間：9:00〜17:00\n定休日：第3月曜日、年末年始（12/28～1/1）\n利用料金：大人310円 / 高校生・大学生150円 / 小中学生100円\nTEL：0997541210"
+      },
+      {
+        id: "amami-hub-center",
+        lat: 28.3905,
+        lng: 129.493571,
+        title: "奄美観光ハブセンター",
+        category: "観光アトラクション",
+        description: "営業時間：9:00〜17:00\n定休日：なし\n利用料金：大人（高校生以上）500円 / 小人（小中学生）300円\nTEL：0997521505"
+      },
+
+      // ===== 注意 =====
+      {
+        id: "habu-warning",
+        lat: 28.387954640773568,
+        lng: 129.4853607002732,
+        title: "ハブ出没注意（仮）",
+        category: "注意",
+        description: "ハブの発生情報あり\n通行時に注意してください"
       }
     ];
 
