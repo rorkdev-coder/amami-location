@@ -59,7 +59,6 @@
 <body>
   <div class="controls">
     <button class="btn" id="locateBtn">📍 現在地を表示</button>
-    <a class="btn" id="openSelfBtn" href="#" target="_blank" rel="noopener">↗ 別ページで開く</a>
   </div>
 
   <div id="map"></div>
@@ -283,11 +282,10 @@
         mapTypeControl: false,
         streetViewControl: false,
         fullscreenControl: true,
-        mapId: "ef633c769a15ea5f5f112602"
+        mapId: "YOUR_MAP_ID"
       });
 
       infoWindow = new google.maps.InfoWindow();
-      document.getElementById("openSelfBtn").href = window.location.href;
 
       const bounds = new google.maps.LatLngBounds();
 
@@ -397,7 +395,7 @@
   <script
     async
     defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC8dHUikjdSAExARQfT8r0yadFN2O5mRFc&libraries=marker&callback=initMap">
+    src="https://maps.googleapis.com/maps/api/js?key=YOUR_NEW_API_KEY&libraries=marker&callback=initMap">
   </script>
   <script src="https://cdn.gtranslate.net/widgets/latest/float.js" defer></script>
 </body>
