@@ -74,8 +74,8 @@
     let currentCircle = null;
 
     const spots = [
-      // ===== 飲食店 =====
       {
+        id: "minami-sushi",
         lat: 28.393219,
         lng: 129.494406,
         title: "美波すし",
@@ -83,6 +83,7 @@
         description: "TEL 0997526367\n営業時間 10:00〜22:00\n定休日 日曜\n決済方法 現金/楽天ペイ\n\nクルーズ客大歓迎"
       },
       {
+        id: "kouwan-shokudo",
         lat: 28.389171,
         lng: 129.494046,
         title: "港湾食堂",
@@ -90,143 +91,12 @@
         description: "TEL 0997693130\n営業時間 （平日）11:00〜14:00 17:00〜19:30 （土日）6:00〜14:00 17:00〜19:30\n定休日 日曜\n決済方法 確認中\n\nいつでも来てね"
       },
       {
-        lat: 28.382624,
-        lng: 129.493214,
-        title: "麺屋くろべえ",
-        category: "飲食店",
-        description: "TEL 0997532677\n営業時間 （平日）11:00〜14:00 17:00〜19:30 （土日）6:00〜14:00 17:00〜19:30\n定休日 日曜\n決済方法 確認中\n\n現金のみです"
-      },
-      {
-        lat: 28.382699,
-        lng: 129.492764,
-        title: "みちょれ市場",
-        category: "飲食店",
-        description: "TEL 0997571811\n営業時間 11:00〜14:30（L.O.14:00）\n定休日 月曜・水曜・日曜\n決済方法 現金・クレジット・バーコード決済・電子マネー\n\n任意のコメントを記載できます"
-      },
-      {
-        lat: 28.382725,
-        lng: 129.493839,
-        title: "WA・CAFE",
-        category: "飲食店",
-        description: "TEL 0997587573\n営業時間 11:00〜16:00\n定休日 火曜\n決済方法 現金・クレジット\n\n任意のコメントを記載できます"
-      },
-      {
-        lat: 28.387063,
-        lng: 129.502632,
-        title: "すし まんてん 小浜店",
-        category: "飲食店",
-        description: "TEL 0997527166\n営業時間 11:00〜14:00 17:00〜21:30\n定休日 火曜\n決済方法 現金・クレジット・電子マネー\n\n任意のコメントを記載できます"
-      },
-      {
-        lat: 28.394240,
-        lng: 129.494852,
-        title: "ジョイフル 奄美長浜店",
-        category: "飲食店",
-        description: "TEL 0997693882\n営業時間 24時間\n定休日 なし\n決済方法 現金・クレジット・電子マネー\n\n任意のコメントを記載できます"
-      },
-      {
-        lat: 28.394115,
-        lng: 129.494824,
-        title: "オリバーズカフェ",
-        category: "飲食店",
-        description: "任意のコメントを記載できます"
-      },
-      {
-        lat: 28.395843,
-        lng: 129.494141,
-        title: "ラーメンごっぱち家",
-        category: "飲食店",
-        description: "任意のコメントを記載できます"
-      },
-      {
-        lat: 28.395843,
-        lng: 129.494141,
-        title: "創作キッチン檸檬",
-        category: "飲食店",
-        description: "任意のコメントを記載できます"
-      },
-      {
-        lat: 28.394090,
-        lng: 129.494435,
-        title: "八百千",
-        category: "飲食店",
-        description: "任意のコメントを記載できます"
-      },
-      {
-        lat: 28.392143,
-        lng: 129.494538,
-        title: "奥商店",
-        category: "飲食店",
-        description: "任意のコメントを記載できます"
-      },
-      {
-        lat: 28.396573,
-        lng: 129.494860,
-        title: "郷土料理 レストラン あさばな 奄美",
-        category: "飲食店",
-        description: "任意のコメントを記載できます"
-      },
-      {
-        lat: 28.394776,
-        lng: 129.494527,
-        title: "おむすび屋長浜店",
-        category: "飲食店",
-        description: "任意のコメントを記載できます"
-      },
-      {
-        lat: 28.396262,
-        lng: 129.493407,
-        title: "あんだぎや",
-        category: "飲食店",
-        description: "任意のコメントを記載できます"
-      },
-      {
-        lat: 28.394300,
-        lng: 129.494480,
-        title: "Sucre sucré（シュクレシュクレ）",
-        category: "飲食店",
-        description: "任意のコメントを記載できます"
-      },
-
-      // ===== お買い物 =====
-      {
-        lat: 28.3946414,
-        lng: 129.49451912,
-        title: "グリーンストア長浜店",
-        category: "お買い物",
-        description: "食料品\nTEL 0997524052\n営業時間 9:00〜21:30\n定休日 なし\n決済方法 確認中"
-      },
-      {
-        lat: 28.386638,
-        lng: 129.493824,
-        title: "ドラッグストア マツモトキヨシ 塩浜店",
-        category: "お買い物",
-        description: "薬品、日用品\nTEL 確認中\n営業時間 9:00〜24:00\n定休日 なし\n決済方法 確認中"
-      },
-
-      // ===== 観光アトラクション =====
-      {
+        id: "amami-museum",
         lat: 28.398404,
         lng: 129.494464,
         title: "奄美博物館",
         category: "観光アトラクション",
         description: "TEL 0997541210\n営業時間 9:00〜17:00\n定休日 第3月曜日、年末年始（12/28～1/1）\n決済方法 確認中\n利用料金 大人310円 高校生・大学生150円 小中学生100円"
-      },
-      {
-        lat: 28.3905,
-        lng: 129.493571,
-        title: "奄美観光ハブセンター",
-        category: "観光アトラクション",
-        description: "TEL 0997521505\n営業時間 9:00〜17:00\n定休日 なし\n決済方法 確認中\n利用料金 大人（高校生以上）500円 小人（小中学生）300円"
-      },
-
-      // ===== 注意 =====
-      {
-        lat: 28.387954640773568,
-        lng: 129.4853607002732,
-        title: "ハブ出没注意（仮）",
-        category: "注意",
-        description: "ハブの発生情報あり\n通行時に注意してください"
       }
     ];
 
@@ -277,13 +147,33 @@
       return window.self !== window.top;
     }
 
-    function autoOpenCurrentLocationIfNeeded() {
+    function getSpotFromQuery() {
       const params = new URLSearchParams(window.location.search);
-      if (params.get("showCurrentLocation") === "1") {
-        const btn = document.getElementById("locateBtn");
-        if (btn) {
-          setTimeout(() => btn.click(), 500);
-        }
+      return params.get("spot");
+    }
+
+    function shouldAutoOpenCurrentLocation() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("showCurrentLocation") === "1";
+    }
+
+    function focusSpotIfNeeded() {
+      const spotId = getSpotFromQuery();
+      if (!spotId) return;
+
+      const target = spots.find(s => s.id === spotId);
+      if (!target) return;
+
+      map.setCenter({ lat: target.lat, lng: target.lng });
+      map.setZoom(17);
+      document.getElementById("status").textContent = `${target.title} を表示しています。`;
+    }
+
+    function autoOpenCurrentLocationIfNeeded() {
+      if (!shouldAutoOpenCurrentLocation()) return;
+      const btn = document.getElementById("locateBtn");
+      if (btn) {
+        setTimeout(() => btn.click(), 500);
       }
     }
 
@@ -333,11 +223,16 @@
         bounds.extend({ lat: spot.lat, lng: spot.lng });
       });
 
-      if (spots.length > 0) {
+      if (spots.length > 0 && !getSpotFromQuery()) {
         map.fitBounds(bounds);
       }
 
-      document.getElementById("status").textContent = `地図を表示しました。スポット数：${spots.length}`;
+      if (getSpotFromQuery()) {
+        focusSpotIfNeeded();
+      } else {
+        document.getElementById("status").textContent = `地図を表示しました。スポット数：${spots.length}`;
+      }
+
       autoOpenCurrentLocationIfNeeded();
     }
 
