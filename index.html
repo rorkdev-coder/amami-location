@@ -71,6 +71,7 @@
     let infoWindow;
     let currentMarker = null;
     let currentCircle = null;
+    let resolvedSpots = [];
 
     const spots = [
       // ===== 飲食店 =====
@@ -329,6 +330,190 @@
         title: "イオン プラザ大島店",
         category: "トイレ",
         description: "営業時間：9:00〜23:00"
+      },
+
+      // ===== クーリングシェルター（住所→初回変換） =====
+      {
+        id: "cooling-naze-shisho",
+        address: "鹿児島県奄美市名瀬幸町25-8",
+        title: "名瀬総合支所庁舎",
+        category: "クーリングシェルター",
+        description: "開放可能日時：平日 8:30〜17:15\n休館日等：土日祝日、12/29〜1/3\n開放スペース：2階 行政情報コーナー・ゆらいどころ\n受け入れ可能人数：30〜40人"
+      },
+      {
+        id: "cooling-sumiyo-shisho",
+        address: "鹿児島県奄美市住用町大字西仲間111番地",
+        title: "住用総合支所庁舎",
+        category: "クーリングシェルター",
+        description: "開放可能日時：平日 8:30〜17:15\n休館日等：土日祝日、12/29〜1/3\n開放スペース：2階玄関ホール\n受け入れ可能人数：15人"
+      },
+      {
+        id: "cooling-kasari-shisho",
+        address: "鹿児島県奄美市笠利町大字中金久141番地",
+        title: "笠利総合支所庁舎",
+        category: "クーリングシェルター",
+        description: "開放可能日時：平日 8:30〜17:15\n休館日等：土日祝日、12/29〜1/3\n開放スペース：1階玄関ホール\n受け入れ可能人数：10〜20人"
+      },
+      {
+        id: "cooling-fureai-no-sato",
+        address: "鹿児島県奄美市笠利町大字中金久45番地",
+        title: "ふれ愛の郷",
+        category: "クーリングシェルター",
+        description: "開放可能日時：平日 8:30〜17:15\n休館日等：土日祝日、12/29〜1/3\n開放スペース：いきいき健康課受付前スペース\n受け入れ可能人数：5人"
+      },
+      {
+        id: "cooling-amahome-plaza",
+        address: "鹿児島県奄美市名瀬柳町2番1号",
+        title: "アマホームPLAZA",
+        category: "クーリングシェルター",
+        description: "開放可能日時：9:00〜21:00\n休館日等：第3月曜日、12/29〜1/3\n開放スペース：1階マチナカリビング北側\n受け入れ可能人数：15人"
+      },
+      {
+        id: "cooling-aiai-hiroba",
+        address: "鹿児島県奄美市名瀬末広町14番10号",
+        title: "奄美市AiAiひろば",
+        category: "クーリングシェルター",
+        description: "開放可能日時：9:00〜20:00\n休館日等：12/31〜1/1\n開放スペース：1階休憩所\n受け入れ可能人数：20人"
+      },
+      {
+        id: "cooling-sumiyo-kominkan",
+        address: "鹿児島県奄美市住用町大字西仲間65番地",
+        title: "住用公民館",
+        category: "クーリングシェルター",
+        description: "開放可能日時：9:00〜17:00\n休館日等：毎月第3月曜日、12/28〜1/4\n開放スペース：1階 会議室・講座室\n受け入れ可能人数：10人"
+      },
+      {
+        id: "cooling-mangrove-park",
+        address: "鹿児島県奄美市住用町大字石原478番地",
+        title: "マングローブパーク",
+        category: "クーリングシェルター",
+        description: "開放可能日時：9:00〜18:00（夏季3月〜10月）\n休館日等：定休日なし、12/31午後〜1/3休館\n開放スペース：本館（受付前スペース）\n受け入れ可能人数：20〜30人"
+      },
+      {
+        id: "cooling-santaro-no-sato",
+        address: "鹿児島県奄美市住用町大字摺勝555番地13",
+        title: "三太郎の里",
+        category: "クーリングシェルター",
+        description: "開放可能日時：9:30〜17:30\n休館日等：年中無休\n開放スペース：展示体験コーナー\n受け入れ可能人数：5人"
+      },
+      {
+        id: "cooling-hitomono-plaza",
+        address: "鹿児島県奄美市笠利町大字節田1717番地1",
+        title: "ひと・もの交流プラザ",
+        category: "クーリングシェルター",
+        description: "開放可能日時：8:30〜18:00\n休館日等：年末年始、12/31〜1/1\n開放スペース：観光交通情報案内所\n受け入れ可能人数：5人"
+      },
+      {
+        id: "cooling-amami-park",
+        address: "鹿児島県奄美市笠利町大字節田1834番地",
+        title: "鹿児島県奄美パーク",
+        category: "クーリングシェルター",
+        description: "開放可能日時：9:00〜18:00（7/1〜8/31は9:00〜19:00）\n休館日等：毎月第1・第3水曜日（祝日の場合は翌日）、12/30〜1/1\n開放スペース：奄美の郷（総合展示ホール、売店、レストラン、奄美シアターを除く）\n受け入れ可能人数：100人"
+      },
+      {
+        id: "cooling-pref-library",
+        address: "鹿児島県奄美市名瀬古田町1番1号",
+        title: "県立図書館",
+        category: "クーリングシェルター",
+        description: "開放可能日時：火〜土 8:30〜18:00 / 日・祝日 9:00〜17:00\n休館日等：月曜日、整理研修日\n開放スペース：全館（一部スペース除く）\n受け入れ可能人数：随時受入"
+      },
+      {
+        id: "cooling-toyota-mobility-parts",
+        address: "鹿児島県奄美市有屋町5番15号",
+        title: "トヨタモビリティパーツ",
+        category: "クーリングシェルター",
+        description: "開放可能日時：月〜土（第2・第4土曜日定休日）\n休館日等：第1・第3土曜日、日曜日\n開放スペース：車両展示場テーブル前\n受け入れ可能人数：10人"
+      },
+      {
+        id: "cooling-naze-post",
+        address: "鹿児島県奄美市名瀬幸町3-10",
+        title: "名瀬郵便局",
+        category: "クーリングシェルター",
+        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：3人"
+      },
+      {
+        id: "cooling-uragami-post",
+        address: "鹿児島県奄美市名瀬有屋町1-4",
+        title: "浦上郵便局",
+        category: "クーリングシェルター",
+        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：2人"
+      },
+      {
+        id: "cooling-nagatabashi-post",
+        address: "鹿児島県奄美市名瀬石橋町6-6",
+        title: "永田橋郵便局",
+        category: "クーリングシェルター",
+        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：4人"
+      },
+      {
+        id: "cooling-kosyuku-post",
+        address: "鹿児島県奄美市名瀬平松町454",
+        title: "小宿郵便局",
+        category: "クーリングシェルター",
+        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：3人"
+      },
+      {
+        id: "cooling-kominato-post",
+        address: "鹿児島県奄美市名瀬小湊264-5",
+        title: "大島小湊郵便局",
+        category: "クーリングシェルター",
+        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：5人"
+      },
+      {
+        id: "cooling-sumiyo-post",
+        address: "鹿児島県奄美市住用町石原4",
+        title: "住用郵便局",
+        category: "クーリングシェルター",
+        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：2人"
+      },
+      {
+        id: "cooling-higashijo-post",
+        address: "鹿児島県奄美市住用町城387",
+        title: "東城郵便局",
+        category: "クーリングシェルター",
+        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：2人"
+      },
+      {
+        id: "cooling-furuta-post",
+        address: "鹿児島県奄美市名瀬古田町11-34",
+        title: "名瀬古田郵便局",
+        category: "クーリングシェルター",
+        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：2人"
+      },
+      {
+        id: "cooling-sadaikuma-post",
+        address: "鹿児島県奄美市名瀬佐大熊町14-14",
+        title: "名瀬佐大熊郵便局",
+        category: "クーリングシェルター",
+        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：3人"
+      },
+      {
+        id: "cooling-kasari-post",
+        address: "鹿児島県奄美市笠利町笠利22",
+        title: "笠利郵便局",
+        category: "クーリングシェルター",
+        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：2人"
+      },
+      {
+        id: "cooling-akagina-post",
+        address: "鹿児島県奄美市笠利町里37-4",
+        title: "赤木名郵便局",
+        category: "クーリングシェルター",
+        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：2人"
+      },
+      {
+        id: "cooling-yado-post",
+        address: "鹿児島県奄美市笠利町宇宿140",
+        title: "宇宿郵便局",
+        category: "クーリングシェルター",
+        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：2人"
+      },
+      {
+        id: "cooling-yani-post",
+        address: "鹿児島県奄美市笠利町屋仁74",
+        title: "屋仁郵便局",
+        category: "クーリングシェルター",
+        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：3人"
       }
     ];
 
@@ -339,6 +524,7 @@
       if (category === "観光案内") return { color: "#7e57c2", icon: "ℹ️" };
       if (category === "観光アトラクション") return { color: "#8e24aa", icon: "⭐" };
       if (category === "注意") return { color: "#ef5350", icon: "⚠️" };
+      if (category === "クーリングシェルター") return { color: "#00acc1", icon: "🧊" };
       if (category === "病院") return { color: "#66bb6a", icon: "✚" };
       if (category === "港") return { color: "#3949ab", icon: "⚓" };
       return { color: "#8d6e63", icon: "📍" };
@@ -387,11 +573,80 @@
       return params.get("showCurrentLocation") === "1";
     }
 
+    const GEO_CACHE_KEY = "amami_cooling_shelter_geocode_v1";
+
+    function getGeoCache() {
+      try {
+        return JSON.parse(localStorage.getItem(GEO_CACHE_KEY) || "{}");
+      } catch {
+        return {};
+      }
+    }
+
+    function saveGeoCache(cache) {
+      try {
+        localStorage.setItem(GEO_CACHE_KEY, JSON.stringify(cache));
+      } catch {}
+    }
+
+    function geocodeWithGoogle(geocoder, address) {
+      return new Promise((resolve) => {
+        geocoder.geocode({ address }, (results, status) => {
+          if (status === "OK" && results && results[0]) {
+            const loc = results[0].geometry.location;
+            resolve({ lat: loc.lat(), lng: loc.lng() });
+          } else {
+            resolve(null);
+          }
+        });
+      });
+    }
+
+    async function normalizeSpots(rawSpots) {
+      const geocoder = new google.maps.Geocoder();
+      const cache = getGeoCache();
+      const output = [];
+
+      for (const spot of rawSpots) {
+        if (typeof spot.lat === "number" && typeof spot.lng === "number") {
+          output.push(spot);
+          continue;
+        }
+
+        if (!spot.address) continue;
+
+        const key = spot.address.trim();
+        if (cache[key]) {
+          output.push({
+            ...spot,
+            lat: cache[key].lat,
+            lng: cache[key].lng
+          });
+          continue;
+        }
+
+        const geo = await geocodeWithGoogle(geocoder, spot.address);
+        if (geo) {
+          cache[key] = geo;
+          output.push({
+            ...spot,
+            lat: geo.lat,
+            lng: geo.lng
+          });
+        } else {
+          console.warn("geocode failed:", spot.title, spot.address);
+        }
+      }
+
+      saveGeoCache(cache);
+      return output;
+    }
+
     function focusSpotIfNeeded() {
       const spotId = getSpotFromQuery();
       if (!spotId) return;
 
-      const target = spots.find(s => s.id === spotId);
+      const target = resolvedSpots.find(s => s.id === spotId);
       if (!target) return;
 
       map.setCenter({ lat: target.lat, lng: target.lng });
@@ -418,9 +673,13 @@
       });
 
       infoWindow = new google.maps.InfoWindow();
+      document.getElementById("status").textContent = "地図を読み込んでいます…（クーリングシェルターは初回のみ変換に少し時間がかかります）";
+
+      resolvedSpots = await normalizeSpots(spots);
+
       const bounds = new google.maps.LatLngBounds();
 
-      spots.forEach((spot) => {
+      resolvedSpots.forEach((spot) => {
         const marker = new google.maps.marker.AdvancedMarkerElement({
           map,
           position: { lat: spot.lat, lng: spot.lng },
@@ -433,10 +692,11 @@
 
         marker.addListener("click", () => {
           infoWindow.setContent(`
-            <div style="max-width:240px;">
+            <div style="max-width:260px;">
               <div style="font-weight:700; margin-bottom:6px;">${spot.title}</div>
               <div style="margin-bottom:6px; color:#666;">カテゴリ：${spot.category}</div>
-              <div style="white-space:pre-wrap; margin-bottom:8px;">${spot.description}</div>
+              <div style="white-space:pre-wrap; margin-bottom:8px;">${spot.description || ""}</div>
+              ${spot.address ? `<div style="font-size:12px; color:#666; margin-bottom:8px;">${spot.address}</div>` : ""}
               <a href="${navUrl}" target="_blank" rel="noopener">現在地から案内</a>
             </div>
           `);
@@ -450,14 +710,14 @@
         bounds.extend({ lat: spot.lat, lng: spot.lng });
       });
 
-      if (spots.length > 0 && !getSpotFromQuery()) {
+      if (resolvedSpots.length > 0 && !getSpotFromQuery()) {
         map.fitBounds(bounds);
       }
 
       if (getSpotFromQuery()) {
         focusSpotIfNeeded();
       } else {
-        document.getElementById("status").textContent = `地図を表示しました。スポット数：${spots.length}`;
+        document.getElementById("status").textContent = `地図を表示しました。スポット数：${resolvedSpots.length}`;
       }
 
       autoOpenCurrentLocationIfNeeded();
