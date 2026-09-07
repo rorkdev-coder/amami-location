@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>奄美観光マップ</title>
+
   <style>
     html, body {
       margin: 0;
@@ -16,6 +17,10 @@
       height: 100vh;
     }
 
+    /* ================================
+       上部コントロール
+    ================================= */
+
     .controls {
       position: absolute;
       top: 12px;
@@ -24,10 +29,13 @@
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
+      align-items: flex-start;
     }
 
     .btn {
       padding: 10px 12px;
+      min-height: 42px;
+      box-sizing: border-box;
       border: 1px solid #ddd;
       border-radius: 10px;
       background: white;
@@ -36,45 +44,327 @@
       box-shadow: 0 1px 4px rgba(0,0,0,0.15);
       text-decoration: none;
       color: #000;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
+
+    .btn:hover {
+      background: #f7f7f7;
+    }
+
+    /* ================================
+       カテゴリフィルター
+    ================================= */
+
+    .category-wrapper {
+      position: relative;
+    }
+
+    .category-panel {
+      display: none;
+      position: absolute;
+      top: 50px;
+      left: 0;
+
+      width: 250px;
+      max-width: calc(100vw - 24px);
+
+      padding: 14px;
+
+      background: rgba(255,255,255,0.98);
+      border: 1px solid #ddd;
+      border-radius: 12px;
+
+      box-sizing: border-box;
+
+      box-shadow: 0 4px 14px rgba(0,0,0,0.20);
+    }
+
+    .category-panel.open {
+      display: block;
+    }
+
+    .category-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .category-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .category-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+
+      padding: 7px 4px;
+
+      font-size: 14px;
+      cursor: pointer;
+
+      border-radius: 6px;
+    }
+
+    .category-item:hover {
+      background: #f5f5f5;
+    }
+
+    .category-item input {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .category-actions {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #eee;
+    }
+
+    .show-all-btn {
+      width: 100%;
+      padding: 9px 10px;
+
+      border: 1px solid #ddd;
+      border-radius: 8px;
+
+      background: #f7f7f7;
+      color: #222;
+
+      font-size: 13px;
+      font-weight: 600;
+
+      cursor: pointer;
+    }
+
+    .show-all-btn:hover {
+      background: #eeeeee;
+    }
+
+    /* ================================
+       ステータス
+    ================================= */
 
     .status {
       position: absolute;
       left: 12px;
       bottom: 12px;
       z-index: 10;
+
       background: rgba(255,255,255,0.95);
       border: 1px solid #eee;
       border-radius: 10px;
+
       padding: 10px 12px;
+
       max-width: 92%;
+
       font-size: 12px;
       line-height: 1.4;
+
       box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+
       white-space: pre-wrap;
     }
+
+    /* ================================
+       スマホ
+    ================================= */
+
+    @media (max-width: 600px) {
+
+      .controls {
+        top: 8px;
+        left: 8px;
+        right: 8px;
+      }
+
+      .btn {
+        font-size: 13px;
+        padding: 9px 10px;
+      }
+
+      .category-panel {
+        top: 47px;
+        width: 240px;
+      }
+
+      .status {
+        left: 8px;
+        bottom: 8px;
+        max-width: calc(100% - 40px);
+      }
+    }
+
   </style>
 </head>
+
 <body>
+
+  <!-- ================================
+       上部ボタン
+  ================================= -->
+
   <div class="controls">
-    <button class="btn" id="locateBtn">📍 現在地を表示</button>
+
+    <button class="btn" id="locateBtn">
+      📍 現在地を表示
+    </button>
+
+    <div class="category-wrapper">
+
+      <button
+        class="btn"
+        id="categoryBtn"
+        type="button"
+        aria-expanded="false"
+      >
+        ☰ 表示カテゴリ
+      </button>
+
+      <div
+        class="category-panel"
+        id="categoryPanel"
+      >
+
+        <div class="category-title">
+          表示するスポット
+        </div>
+
+        <div class="category-list">
+
+          <label class="category-item">
+            <input
+              type="checkbox"
+              class="category-checkbox"
+              value="飲食店"
+              checked
+            >
+            <span>🍴 飲食店</span>
+          </label>
+
+          <label class="category-item">
+            <input
+              type="checkbox"
+              class="category-checkbox"
+              value="お買い物"
+              checked
+            >
+            <span>🛍️ お買い物</span>
+          </label>
+
+          <label class="category-item">
+            <input
+              type="checkbox"
+              class="category-checkbox"
+              value="観光アトラクション"
+              checked
+            >
+            <span>⭐ 観光アトラクション</span>
+          </label>
+
+          <label class="category-item">
+            <input
+              type="checkbox"
+              class="category-checkbox"
+              value="トイレ"
+              checked
+            >
+            <span>🚻 トイレ</span>
+          </label>
+
+          <label class="category-item">
+            <input
+              type="checkbox"
+              class="category-checkbox"
+              value="注意"
+              checked
+            >
+            <span>⚠️ 注意</span>
+          </label>
+
+          <label class="category-item">
+            <input
+              type="checkbox"
+              class="category-checkbox"
+              value="クーリングシェルター"
+              checked
+            >
+            <span>🧊 クーリングシェルター</span>
+          </label>
+
+        </div>
+
+        <div class="category-actions">
+
+          <button
+            type="button"
+            class="show-all-btn"
+            id="showAllBtn"
+          >
+            すべて表示
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
   </div>
 
+
+  <!-- ================================
+       MAP
+  ================================= -->
+
   <div id="map"></div>
-  <div class="status" id="status">地図を読み込んでいます…</div>
+
+  <div class="status" id="status">
+    地図を読み込んでいます…
+  </div>
+
+
+  <!-- GTranslate -->
 
   <div class="gtranslate_wrapper"></div>
 
+
   <script>
+
     let map;
     let infoWindow;
+
     let currentMarker = null;
     let currentCircle = null;
-    let resolvedSpots = [];
+
+    /*
+      作成したマーカーをここに保存します。
+
+      {
+        marker: AdvancedMarkerElement,
+        category: "飲食店"
+      }
+
+      のような形になります。
+    */
+    const spotMarkers = [];
+
+
+    /* =========================================================
+       スポット
+    ========================================================== */
 
     const spots = [
+
       // ===== 飲食店 =====
+
       {
         id: "minami-sushi",
         lat: 28.393219,
@@ -83,6 +373,7 @@
         category: "飲食店",
         description: "営業時間：10:00〜22:00\n定休日：日曜\n決済方法：現金 / 楽天ペイ\nTEL：0997526367\n\nクルーズ客大歓迎"
       },
+
       {
         id: "kouwan-shokudo",
         lat: 28.389171,
@@ -91,6 +382,7 @@
         category: "飲食店",
         description: "営業時間：（平日）11:00〜14:00 / 17:00〜19:30\n（土日）6:00〜14:00 / 17:00〜19:30\n定休日：日曜\n決済方法：確認中\nTEL：0997693130\n\nいつでも来てね"
       },
+
       {
         id: "menya-kurobee",
         lat: 28.382624,
@@ -99,6 +391,7 @@
         category: "飲食店",
         description: "営業時間：（平日）11:00〜14:00 / 17:00〜19:30\n（土日）6:00〜14:00 / 17:00〜19:30\n定休日：日曜\n決済方法：確認中\nTEL：0997532677\n\n現金のみです"
       },
+
       {
         id: "michore-ichiba",
         lat: 28.382699,
@@ -107,6 +400,7 @@
         category: "飲食店",
         description: "営業時間：11:00〜14:30（L.O.14:00）\n定休日：月曜・水曜・日曜\n決済方法：現金・クレジット・バーコード決済・電子マネー\nTEL：0997571811"
       },
+
       {
         id: "wa-cafe",
         lat: 28.382725,
@@ -115,6 +409,7 @@
         category: "飲食店",
         description: "営業時間：11:00〜16:00\n定休日：火曜\n決済方法：現金・クレジット\nTEL：0997587573"
       },
+
       {
         id: "sushi-manten-obama",
         lat: 28.387063,
@@ -123,6 +418,7 @@
         category: "飲食店",
         description: "営業時間：11:00〜14:00 / 17:00〜21:30\n定休日：火曜\n決済方法：現金・クレジット・電子マネー\nTEL：0997527166"
       },
+
       {
         id: "joyfull-nagahama",
         lat: 28.394240,
@@ -131,6 +427,7 @@
         category: "飲食店",
         description: "営業時間：24時間\n定休日：なし\n決済方法：現金・クレジット・電子マネー\nTEL：0997693882"
       },
+
       {
         id: "olivers-cafe",
         lat: 28.394115,
@@ -139,6 +436,7 @@
         category: "飲食店",
         description: "営業時間：確認中\n定休日：確認中\n決済方法：確認中"
       },
+
       {
         id: "ramen-goppachiya",
         lat: 28.395843,
@@ -147,6 +445,7 @@
         category: "飲食店",
         description: "営業時間：確認中\n定休日：確認中\n決済方法：確認中"
       },
+
       {
         id: "sousaku-kitchen-lemon",
         lat: 28.395843,
@@ -155,6 +454,7 @@
         category: "飲食店",
         description: "営業時間：確認中\n定休日：確認中\n決済方法：確認中"
       },
+
       {
         id: "yaosen",
         lat: 28.394090,
@@ -163,6 +463,7 @@
         category: "飲食店",
         description: "営業時間：確認中\n定休日：確認中\n決済方法：確認中"
       },
+
       {
         id: "oku-shoten",
         lat: 28.392143,
@@ -171,6 +472,7 @@
         category: "飲食店",
         description: "営業時間：確認中\n定休日：確認中\n決済方法：確認中"
       },
+
       {
         id: "asabana-amami",
         lat: 28.396573,
@@ -179,6 +481,7 @@
         category: "飲食店",
         description: "営業時間：確認中\n定休日：確認中\n決済方法：確認中"
       },
+
       {
         id: "omusubiya-nagahama",
         lat: 28.394776,
@@ -187,6 +490,7 @@
         category: "飲食店",
         description: "営業時間：確認中\n定休日：確認中\n決済方法：確認中"
       },
+
       {
         id: "andagiya",
         lat: 28.396262,
@@ -195,6 +499,7 @@
         category: "飲食店",
         description: "営業時間：確認中\n定休日：確認中\n決済方法：確認中"
       },
+
       {
         id: "sucre-sucre",
         lat: 28.394300,
@@ -204,7 +509,9 @@
         description: "営業時間：確認中\n定休日：確認中\n決済方法：確認中"
       },
 
+
       // ===== お買い物 =====
+
       {
         id: "green-store-nagahama",
         lat: 28.3946414,
@@ -213,6 +520,7 @@
         category: "お買い物",
         description: "食料品\n営業時間：9:00〜21:30\n定休日：なし\n決済方法：確認中\nTEL：0997524052"
       },
+
       {
         id: "matsukiyo-shiohama",
         lat: 28.386638,
@@ -222,7 +530,9 @@
         description: "薬品・日用品\n営業時間：9:00〜24:00\n定休日：なし\n決済方法：確認中\nTEL：確認中"
       },
 
+
       // ===== 観光アトラクション =====
+
       {
         id: "amami-museum",
         lat: 28.398404,
@@ -231,6 +541,7 @@
         category: "観光アトラクション",
         description: "営業時間：9:00〜17:00\n定休日：第3月曜日、年末年始（12/28～1/1）\n利用料金：大人310円 / 高校生・大学生150円 / 小中学生100円\nTEL：0997541210"
       },
+
       {
         id: "amami-hub-center",
         lat: 28.3905,
@@ -240,7 +551,9 @@
         description: "営業時間：9:00〜17:00\n定休日：なし\n利用料金：大人（高校生以上）500円 / 小人（小中学生）300円\nTEL：0997521505"
       },
 
+
       // ===== 注意 =====
+
       {
         id: "habu-warning",
         lat: 28.387954640773568,
@@ -250,7 +563,9 @@
         description: "ハブの発生情報あり\n通行時に注意してください"
       },
 
+
       // ===== トイレ =====
+
       {
         id: "toilet-marine-town",
         lat: 28.3844193,
@@ -259,6 +574,7 @@
         category: "トイレ",
         description: "バリアフリー"
       },
+
       {
         id: "toilet-familymart-minatocho",
         lat: 28.381264,
@@ -267,6 +583,7 @@
         category: "トイレ",
         description: "営業時間：確認中"
       },
+
       {
         id: "toilet-fureai-park",
         lat: 28.37895,
@@ -275,6 +592,7 @@
         category: "トイレ",
         description: "営業時間：7:30〜21:00\n第7回グッドトイレ10"
       },
+
       {
         id: "toilet-amahome-plaza",
         lat: 28.37884415,
@@ -283,6 +601,7 @@
         category: "トイレ",
         description: "営業時間：9:00〜21:00"
       },
+
       {
         id: "toilet-kaneku-park",
         lat: 28.37991105,
@@ -291,6 +610,7 @@
         category: "トイレ",
         description: "営業時間：確認中"
       },
+
       {
         id: "toilet-aiai-hiroba",
         lat: 28.377544,
@@ -299,6 +619,7 @@
         category: "トイレ",
         description: "営業時間：9:00〜20:00"
       },
+
       {
         id: "toilet-hama-park",
         lat: 28.38012761,
@@ -307,6 +628,7 @@
         category: "トイレ",
         description: "営業時間：確認中"
       },
+
       {
         id: "toilet-gotenhama-park",
         lat: 28.381572,
@@ -315,6 +637,7 @@
         category: "トイレ",
         description: "営業時間：確認中"
       },
+
       {
         id: "toilet-asahi-park",
         lat: 28.37799764,
@@ -323,6 +646,7 @@
         category: "トイレ",
         description: "営業時間：確認中"
       },
+
       {
         id: "toilet-aeon-plaza-oshima",
         lat: 28.384097,
@@ -330,477 +654,880 @@
         title: "イオン プラザ大島店",
         category: "トイレ",
         description: "営業時間：9:00〜23:00"
-      },
-
-      // ===== クーリングシェルター（住所→初回変換） =====
-      {
-        id: "cooling-naze-shisho",
-        address: "鹿児島県奄美市名瀬幸町25-8",
-        title: "名瀬総合支所庁舎",
-        category: "クーリングシェルター",
-        description: "開放可能日時：平日 8:30〜17:15\n休館日等：土日祝日、12/29〜1/3\n開放スペース：2階 行政情報コーナー・ゆらいどころ\n受け入れ可能人数：30〜40人"
-      },
-      {
-        id: "cooling-sumiyo-shisho",
-        address: "鹿児島県奄美市住用町大字西仲間111番地",
-        title: "住用総合支所庁舎",
-        category: "クーリングシェルター",
-        description: "開放可能日時：平日 8:30〜17:15\n休館日等：土日祝日、12/29〜1/3\n開放スペース：2階玄関ホール\n受け入れ可能人数：15人"
-      },
-      {
-        id: "cooling-kasari-shisho",
-        address: "鹿児島県奄美市笠利町大字中金久141番地",
-        title: "笠利総合支所庁舎",
-        category: "クーリングシェルター",
-        description: "開放可能日時：平日 8:30〜17:15\n休館日等：土日祝日、12/29〜1/3\n開放スペース：1階玄関ホール\n受け入れ可能人数：10〜20人"
-      },
-      {
-        id: "cooling-fureai-no-sato",
-        address: "鹿児島県奄美市笠利町大字中金久45番地",
-        title: "ふれ愛の郷",
-        category: "クーリングシェルター",
-        description: "開放可能日時：平日 8:30〜17:15\n休館日等：土日祝日、12/29〜1/3\n開放スペース：いきいき健康課受付前スペース\n受け入れ可能人数：5人"
-      },
-      {
-        id: "cooling-amahome-plaza",
-        address: "鹿児島県奄美市名瀬柳町2番1号",
-        title: "アマホームPLAZA",
-        category: "クーリングシェルター",
-        description: "開放可能日時：9:00〜21:00\n休館日等：第3月曜日、12/29〜1/3\n開放スペース：1階マチナカリビング北側\n受け入れ可能人数：15人"
-      },
-      {
-        id: "cooling-aiai-hiroba",
-        address: "鹿児島県奄美市名瀬末広町14番10号",
-        title: "奄美市AiAiひろば",
-        category: "クーリングシェルター",
-        description: "開放可能日時：9:00〜20:00\n休館日等：12/31〜1/1\n開放スペース：1階休憩所\n受け入れ可能人数：20人"
-      },
-      {
-        id: "cooling-sumiyo-kominkan",
-        address: "鹿児島県奄美市住用町大字西仲間65番地",
-        title: "住用公民館",
-        category: "クーリングシェルター",
-        description: "開放可能日時：9:00〜17:00\n休館日等：毎月第3月曜日、12/28〜1/4\n開放スペース：1階 会議室・講座室\n受け入れ可能人数：10人"
-      },
-      {
-        id: "cooling-mangrove-park",
-        address: "鹿児島県奄美市住用町大字石原478番地",
-        title: "マングローブパーク",
-        category: "クーリングシェルター",
-        description: "開放可能日時：9:00〜18:00（夏季3月〜10月）\n休館日等：定休日なし、12/31午後〜1/3休館\n開放スペース：本館（受付前スペース）\n受け入れ可能人数：20〜30人"
-      },
-      {
-        id: "cooling-santaro-no-sato",
-        address: "鹿児島県奄美市住用町大字摺勝555番地13",
-        title: "三太郎の里",
-        category: "クーリングシェルター",
-        description: "開放可能日時：9:30〜17:30\n休館日等：年中無休\n開放スペース：展示体験コーナー\n受け入れ可能人数：5人"
-      },
-      {
-        id: "cooling-hitomono-plaza",
-        address: "鹿児島県奄美市笠利町大字節田1717番地1",
-        title: "ひと・もの交流プラザ",
-        category: "クーリングシェルター",
-        description: "開放可能日時：8:30〜18:00\n休館日等：年末年始、12/31〜1/1\n開放スペース：観光交通情報案内所\n受け入れ可能人数：5人"
-      },
-      {
-        id: "cooling-amami-park",
-        address: "鹿児島県奄美市笠利町大字節田1834番地",
-        title: "鹿児島県奄美パーク",
-        category: "クーリングシェルター",
-        description: "開放可能日時：9:00〜18:00（7/1〜8/31は9:00〜19:00）\n休館日等：毎月第1・第3水曜日（祝日の場合は翌日）、12/30〜1/1\n開放スペース：奄美の郷（総合展示ホール、売店、レストラン、奄美シアターを除く）\n受け入れ可能人数：100人"
-      },
-      {
-        id: "cooling-pref-library",
-        address: "鹿児島県奄美市名瀬古田町1番1号",
-        title: "県立図書館",
-        category: "クーリングシェルター",
-        description: "開放可能日時：火〜土 8:30〜18:00 / 日・祝日 9:00〜17:00\n休館日等：月曜日、整理研修日\n開放スペース：全館（一部スペース除く）\n受け入れ可能人数：随時受入"
-      },
-      {
-        id: "cooling-toyota-mobility-parts",
-        address: "鹿児島県奄美市有屋町5番15号",
-        title: "トヨタモビリティパーツ",
-        category: "クーリングシェルター",
-        description: "開放可能日時：月〜土（第2・第4土曜日定休日）\n休館日等：第1・第3土曜日、日曜日\n開放スペース：車両展示場テーブル前\n受け入れ可能人数：10人"
-      },
-      {
-        id: "cooling-naze-post",
-        address: "鹿児島県奄美市名瀬幸町3-10",
-        title: "名瀬郵便局",
-        category: "クーリングシェルター",
-        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：3人"
-      },
-      {
-        id: "cooling-uragami-post",
-        address: "鹿児島県奄美市名瀬有屋町1-4",
-        title: "浦上郵便局",
-        category: "クーリングシェルター",
-        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：2人"
-      },
-      {
-        id: "cooling-nagatabashi-post",
-        address: "鹿児島県奄美市名瀬石橋町6-6",
-        title: "永田橋郵便局",
-        category: "クーリングシェルター",
-        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：4人"
-      },
-      {
-        id: "cooling-kosyuku-post",
-        address: "鹿児島県奄美市名瀬平松町454",
-        title: "小宿郵便局",
-        category: "クーリングシェルター",
-        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：3人"
-      },
-      {
-        id: "cooling-kominato-post",
-        address: "鹿児島県奄美市名瀬小湊264-5",
-        title: "大島小湊郵便局",
-        category: "クーリングシェルター",
-        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：5人"
-      },
-      {
-        id: "cooling-sumiyo-post",
-        address: "鹿児島県奄美市住用町石原4",
-        title: "住用郵便局",
-        category: "クーリングシェルター",
-        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：2人"
-      },
-      {
-        id: "cooling-higashijo-post",
-        address: "鹿児島県奄美市住用町城387",
-        title: "東城郵便局",
-        category: "クーリングシェルター",
-        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：2人"
-      },
-      {
-        id: "cooling-furuta-post",
-        address: "鹿児島県奄美市名瀬古田町11-34",
-        title: "名瀬古田郵便局",
-        category: "クーリングシェルター",
-        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：2人"
-      },
-      {
-        id: "cooling-sadaikuma-post",
-        address: "鹿児島県奄美市名瀬佐大熊町14-14",
-        title: "名瀬佐大熊郵便局",
-        category: "クーリングシェルター",
-        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：3人"
-      },
-      {
-        id: "cooling-kasari-post",
-        address: "鹿児島県奄美市笠利町笠利22",
-        title: "笠利郵便局",
-        category: "クーリングシェルター",
-        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：2人"
-      },
-      {
-        id: "cooling-akagina-post",
-        address: "鹿児島県奄美市笠利町里37-4",
-        title: "赤木名郵便局",
-        category: "クーリングシェルター",
-        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：2人"
-      },
-      {
-        id: "cooling-yado-post",
-        address: "鹿児島県奄美市笠利町宇宿140",
-        title: "宇宿郵便局",
-        category: "クーリングシェルター",
-        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：2人"
-      },
-      {
-        id: "cooling-yani-post",
-        address: "鹿児島県奄美市笠利町屋仁74",
-        title: "屋仁郵便局",
-        category: "クーリングシェルター",
-        description: "開放可能日時：平日 10:00〜15:00（郵便局の営業時間内）\n休館日等：土日祝日\n開放スペース：窓口ルーム\n受け入れ可能人数：3人"
       }
+
+      /*
+        ===== クーリングシェルター =====
+
+        固定 lat / lng が確定したら、
+        この下に
+
+        {
+          id: "...",
+          lat: ...,
+          lng: ...,
+          title: "...",
+          category: "クーリングシェルター",
+          description: "..."
+        }
+
+        の形式で追加します。
+
+        カテゴリフィルター側はすでに対応済みなので、
+        データを追加するだけで自動的に
+        「🧊 クーリングシェルター」のチェックに連動します。
+      */
+
     ];
 
+
+    /* =========================================================
+       マーカーデザイン
+    ========================================================== */
+
     function markerStyle(category) {
-      if (category === "飲食店") return { color: "#ff7043", icon: "🍴" };
-      if (category === "お買い物") return { color: "#42a5f5", icon: "🛍️" };
-      if (category === "トイレ") return { color: "#29b6f6", icon: "🚻" };
-      if (category === "観光案内") return { color: "#7e57c2", icon: "ℹ️" };
-      if (category === "観光アトラクション") return { color: "#8e24aa", icon: "⭐" };
-      if (category === "注意") return { color: "#ef5350", icon: "⚠️" };
-      if (category === "クーリングシェルター") return { color: "#00acc1", icon: "🧊" };
-      if (category === "病院") return { color: "#66bb6a", icon: "✚" };
-      if (category === "港") return { color: "#3949ab", icon: "⚓" };
-      return { color: "#8d6e63", icon: "📍" };
+
+      if (category === "飲食店") {
+        return {
+          color: "#ff7043",
+          icon: "🍴"
+        };
+      }
+
+      if (category === "お買い物") {
+        return {
+          color: "#42a5f5",
+          icon: "🛍️"
+        };
+      }
+
+      if (category === "トイレ") {
+        return {
+          color: "#29b6f6",
+          icon: "🚻"
+        };
+      }
+
+      if (category === "観光案内") {
+        return {
+          color: "#7e57c2",
+          icon: "ℹ️"
+        };
+      }
+
+      if (category === "観光アトラクション") {
+        return {
+          color: "#8e24aa",
+          icon: "⭐"
+        };
+      }
+
+      if (category === "注意") {
+        return {
+          color: "#ef5350",
+          icon: "⚠️"
+        };
+      }
+
+      if (category === "クーリングシェルター") {
+        return {
+          color: "#00acc1",
+          icon: "🧊"
+        };
+      }
+
+      if (category === "病院") {
+        return {
+          color: "#66bb6a",
+          icon: "✚"
+        };
+      }
+
+      if (category === "港") {
+        return {
+          color: "#3949ab",
+          icon: "⚓"
+        };
+      }
+
+      return {
+        color: "#8d6e63",
+        icon: "📍"
+      };
     }
 
+
     function createMarkerElement(category) {
+
       const style = markerStyle(category);
+
       const markerEl = document.createElement("div");
+
       markerEl.style.width = "36px";
       markerEl.style.height = "36px";
       markerEl.style.borderRadius = "50%";
+
       markerEl.style.background = style.color;
+
       markerEl.style.display = "flex";
       markerEl.style.alignItems = "center";
       markerEl.style.justifyContent = "center";
+
       markerEl.style.color = "#fff";
       markerEl.style.fontSize = "18px";
+
       markerEl.style.border = "2px solid white";
-      markerEl.style.boxShadow = "0 2px 6px rgba(0,0,0,0.25)";
+
+      markerEl.style.boxShadow =
+        "0 2px 6px rgba(0,0,0,0.25)";
+
       markerEl.textContent = style.icon;
+
       return markerEl;
     }
 
+
+    /* =========================================================
+       現在地マーカー
+    ========================================================== */
+
     function createCurrentLocationElement() {
+
       const markerEl = document.createElement("div");
+
       markerEl.style.width = "20px";
       markerEl.style.height = "20px";
+
       markerEl.style.borderRadius = "50%";
+
       markerEl.style.background = "#1a73e8";
+
       markerEl.style.border = "3px solid white";
-      markerEl.style.boxShadow = "0 2px 6px rgba(0,0,0,0.25)";
+
+      markerEl.style.boxShadow =
+        "0 2px 6px rgba(0,0,0,0.25)";
+
       return markerEl;
     }
+
+
+    /* =========================================================
+       Google Sites埋め込み判定
+    ========================================================== */
 
     function isEmbedded() {
       return window.self !== window.top;
     }
 
+
+    /* =========================================================
+       URLパラメータ
+    ========================================================== */
+
     function getSpotFromQuery() {
-      const params = new URLSearchParams(window.location.search);
+
+      const params =
+        new URLSearchParams(window.location.search);
+
       return params.get("spot");
     }
 
+
     function shouldAutoOpenCurrentLocation() {
-      const params = new URLSearchParams(window.location.search);
+
+      const params =
+        new URLSearchParams(window.location.search);
+
       return params.get("showCurrentLocation") === "1";
     }
 
-    const GEO_CACHE_KEY = "amami_cooling_shelter_geocode_v1";
 
-    function getGeoCache() {
-      try {
-        return JSON.parse(localStorage.getItem(GEO_CACHE_KEY) || "{}");
-      } catch {
-        return {};
-      }
-    }
-
-    function saveGeoCache(cache) {
-      try {
-        localStorage.setItem(GEO_CACHE_KEY, JSON.stringify(cache));
-      } catch {}
-    }
-
-    function geocodeWithGoogle(geocoder, address) {
-      return new Promise((resolve) => {
-        geocoder.geocode({ address }, (results, status) => {
-          if (status === "OK" && results && results[0]) {
-            const loc = results[0].geometry.location;
-            resolve({ lat: loc.lat(), lng: loc.lng() });
-          } else {
-            resolve(null);
-          }
-        });
-      });
-    }
-
-    async function normalizeSpots(rawSpots) {
-      const geocoder = new google.maps.Geocoder();
-      const cache = getGeoCache();
-      const output = [];
-
-      for (const spot of rawSpots) {
-        if (typeof spot.lat === "number" && typeof spot.lng === "number") {
-          output.push(spot);
-          continue;
-        }
-
-        if (!spot.address) continue;
-
-        const key = spot.address.trim();
-        if (cache[key]) {
-          output.push({
-            ...spot,
-            lat: cache[key].lat,
-            lng: cache[key].lng
-          });
-          continue;
-        }
-
-        const geo = await geocodeWithGoogle(geocoder, spot.address);
-        if (geo) {
-          cache[key] = geo;
-          output.push({
-            ...spot,
-            lat: geo.lat,
-            lng: geo.lng
-          });
-        } else {
-          console.warn("geocode failed:", spot.title, spot.address);
-        }
-      }
-
-      saveGeoCache(cache);
-      return output;
-    }
+    /* =========================================================
+       指定スポットへ移動
+    ========================================================== */
 
     function focusSpotIfNeeded() {
+
       const spotId = getSpotFromQuery();
+
       if (!spotId) return;
 
-      const target = resolvedSpots.find(s => s.id === spotId);
+      const target =
+        spots.find(s => s.id === spotId);
+
       if (!target) return;
 
-      map.setCenter({ lat: target.lat, lng: target.lng });
-      map.setZoom(19);
-      document.getElementById("status").textContent = `${target.title} を表示しています。`;
-    }
+      /*
+        リンクから開いたスポットのカテゴリが
+        チェックOFFになっていた場合でも表示できるようにします。
+      */
 
-    function autoOpenCurrentLocationIfNeeded() {
-      if (!shouldAutoOpenCurrentLocation()) return;
-      const btn = document.getElementById("locateBtn");
-      if (btn) setTimeout(() => btn.click(), 500);
-    }
+      const checkbox =
+        document.querySelector(
+          `.category-checkbox[value="${target.category}"]`
+        );
 
-    async function initMap() {
-      const center = { lat: 28.389, lng: 129.487 };
+      if (checkbox) {
+        checkbox.checked = true;
+        updateCategoryMarkers();
+      }
 
-      map = new google.maps.Map(document.getElementById("map"), {
-        center,
-        zoom: 15,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: true,
-        mapId: "ef633c769a15ea5f5f112602"
+      map.setCenter({
+        lat: target.lat,
+        lng: target.lng
       });
 
-      infoWindow = new google.maps.InfoWindow();
-      document.getElementById("status").textContent = "地図を読み込んでいます…（クーリングシェルターは初回のみ変換に少し時間がかかります）";
+      map.setZoom(19);
 
-      resolvedSpots = await normalizeSpots(spots);
+      document.getElementById("status").textContent =
+        `${target.title} を表示しています。`;
+    }
 
-      const bounds = new google.maps.LatLngBounds();
 
-      resolvedSpots.forEach((spot) => {
-        const marker = new google.maps.marker.AdvancedMarkerElement({
-          map,
-          position: { lat: spot.lat, lng: spot.lng },
-          title: spot.title,
-          content: createMarkerElement(spot.category)
+    /* =========================================================
+       現在地自動表示
+    ========================================================== */
+
+    function autoOpenCurrentLocationIfNeeded() {
+
+      if (!shouldAutoOpenCurrentLocation()) return;
+
+      const btn =
+        document.getElementById("locateBtn");
+
+      if (btn) {
+
+        setTimeout(() => {
+          btn.click();
+        }, 500);
+
+      }
+    }
+
+
+    /* =========================================================
+       カテゴリフィルター
+    ========================================================== */
+
+    function getSelectedCategories() {
+
+      const selected = new Set();
+
+      document
+        .querySelectorAll(".category-checkbox")
+        .forEach((checkbox) => {
+
+          if (checkbox.checked) {
+            selected.add(checkbox.value);
+          }
+
         });
+
+      return selected;
+    }
+
+
+    function updateCategoryMarkers() {
+
+      const selected =
+        getSelectedCategories();
+
+      let visibleCount = 0;
+
+      spotMarkers.forEach((item) => {
+
+        const shouldShow =
+          selected.has(item.category);
+
+        item.marker.map =
+          shouldShow ? map : null;
+
+        if (shouldShow) {
+          visibleCount++;
+        }
+
+      });
+
+      /*
+        開いている吹き出しは閉じます。
+        非表示になったマーカーの吹き出しが
+        残るのを防ぐためです。
+      */
+
+      if (infoWindow) {
+        infoWindow.close();
+      }
+
+      const status =
+        document.getElementById("status");
+
+      status.textContent =
+        `表示中のスポット：${visibleCount}件`;
+    }
+
+
+    function setupCategoryFilter() {
+
+      const categoryBtn =
+        document.getElementById("categoryBtn");
+
+      const categoryPanel =
+        document.getElementById("categoryPanel");
+
+      const showAllBtn =
+        document.getElementById("showAllBtn");
+
+
+      /* パネル開閉 */
+
+      categoryBtn.addEventListener(
+        "click",
+        (event) => {
+
+          event.stopPropagation();
+
+          const isOpen =
+            categoryPanel.classList.toggle("open");
+
+          categoryBtn.setAttribute(
+            "aria-expanded",
+            isOpen ? "true" : "false"
+          );
+
+        }
+      );
+
+
+      /* パネル内部クリックでは閉じない */
+
+      categoryPanel.addEventListener(
+        "click",
+        (event) => {
+
+          event.stopPropagation();
+
+        }
+      );
+
+
+      /* チェック変更 */
+
+      document
+        .querySelectorAll(".category-checkbox")
+        .forEach((checkbox) => {
+
+          checkbox.addEventListener(
+            "change",
+            updateCategoryMarkers
+          );
+
+        });
+
+
+      /* すべて表示 */
+
+      showAllBtn.addEventListener(
+        "click",
+        () => {
+
+          document
+            .querySelectorAll(".category-checkbox")
+            .forEach((checkbox) => {
+
+              checkbox.checked = true;
+
+            });
+
+          updateCategoryMarkers();
+
+        }
+      );
+
+
+      /* 地図などを押したら閉じる */
+
+      document.addEventListener(
+        "click",
+        () => {
+
+          categoryPanel.classList.remove("open");
+
+          categoryBtn.setAttribute(
+            "aria-expanded",
+            "false"
+          );
+
+        }
+      );
+
+    }
+
+
+    /* =========================================================
+       Google Maps 初期化
+    ========================================================== */
+
+    async function initMap() {
+
+      const center = {
+        lat: 28.389,
+        lng: 129.487
+      };
+
+
+      map = new google.maps.Map(
+        document.getElementById("map"),
+        {
+
+          center,
+
+          zoom: 15,
+
+          mapTypeControl: false,
+
+          streetViewControl: false,
+
+          fullscreenControl: true,
+
+          /*
+            これまで使用していたMap ID
+          */
+
+          mapId: "ef633c769a15ea5f5f112602"
+
+        }
+      );
+
+
+      infoWindow =
+        new google.maps.InfoWindow();
+
+
+      const bounds =
+        new google.maps.LatLngBounds();
+
+
+      /* ================================
+         マーカー生成
+      ================================= */
+
+      spots.forEach((spot) => {
+
+        const marker =
+          new google.maps.marker.AdvancedMarkerElement({
+
+            map,
+
+            position: {
+              lat: spot.lat,
+              lng: spot.lng
+            },
+
+            title: spot.title,
+
+            content:
+              createMarkerElement(
+                spot.category
+              )
+
+          });
+
+
+        /*
+          カテゴリフィルター用に保存
+        */
+
+        spotMarkers.push({
+
+          marker,
+
+          category: spot.category,
+
+          spot
+
+        });
+
+
+        /*
+          Google Maps
+          現在地から徒歩ルート
+        */
 
         const navUrl =
           `https://www.google.com/maps/dir/?api=1&origin=Current+Location&destination=${spot.lat},${spot.lng}&travelmode=walking`;
 
-        marker.addListener("click", () => {
-          infoWindow.setContent(`
-            <div style="max-width:260px;">
-              <div style="font-weight:700; margin-bottom:6px;">${spot.title}</div>
-              <div style="margin-bottom:6px; color:#666;">カテゴリ：${spot.category}</div>
-              <div style="white-space:pre-wrap; margin-bottom:8px;">${spot.description || ""}</div>
-              ${spot.address ? `<div style="font-size:12px; color:#666; margin-bottom:8px;">${spot.address}</div>` : ""}
-              <a href="${navUrl}" target="_blank" rel="noopener">現在地から案内</a>
-            </div>
-          `);
 
-          infoWindow.open({
-            anchor: marker,
-            map
-          });
-        });
+        /* ================================
+           マーカークリック
+        ================================= */
 
-        bounds.extend({ lat: spot.lat, lng: spot.lng });
-      });
+        marker.addListener(
+          "click",
+          () => {
 
-      if (resolvedSpots.length > 0 && !getSpotFromQuery()) {
-        map.fitBounds(bounds);
-      }
+            infoWindow.setContent(`
 
-      if (getSpotFromQuery()) {
-        focusSpotIfNeeded();
-      } else {
-        document.getElementById("status").textContent = `地図を表示しました。スポット数：${resolvedSpots.length}`;
-      }
+              <div style="max-width:260px;">
 
-      autoOpenCurrentLocationIfNeeded();
-    }
+                <div
+                  style="
+                    font-weight:700;
+                    margin-bottom:6px;
+                    font-size:15px;
+                  "
+                >
+                  ${spot.title}
+                </div>
 
-    document.addEventListener("click", (e) => {
-      if (e.target && e.target.id === "locateBtn") {
-        const status = document.getElementById("status");
+                <div
+                  style="
+                    margin-bottom:6px;
+                    color:#666;
+                    font-size:12px;
+                  "
+                >
+                  カテゴリ：${spot.category}
+                </div>
 
-        if (isEmbedded()) {
-          const url = new URL(window.location.href);
-          url.searchParams.set("showCurrentLocation", "1");
-          window.open(url.toString(), "_blank", "noopener,noreferrer");
-          return;
-        }
+                <div
+                  style="
+                    white-space:pre-wrap;
+                    margin-bottom:10px;
+                    line-height:1.5;
+                  "
+                >
+                  ${spot.description}
+                </div>
 
-        if (!navigator.geolocation) {
-          status.textContent = "この端末は位置情報に対応していません。";
-          return;
-        }
+                <a
+                  href="${navUrl}"
+                  target="_blank"
+                  rel="noopener"
+                  style="
+                    font-weight:600;
+                    text-decoration:none;
+                  "
+                >
+                  🧭 現在地から道順
+                </a>
 
-        status.textContent = "位置情報を取得しています…（許可が出たら「許可」）";
+              </div>
 
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-            const accuracy = pos.coords.accuracy || 0;
+            `);
 
-            if (currentMarker) currentMarker.map = null;
-            if (currentCircle) currentCircle.setMap(null);
 
-            currentMarker = new google.maps.marker.AdvancedMarkerElement({
-              map,
-              position: { lat, lng },
-              title: "現在地",
-              content: createCurrentLocationElement()
+            infoWindow.open({
+
+              anchor: marker,
+
+              map
+
             });
 
-            currentCircle = new google.maps.Circle({
-              strokeColor: "#1a73e8",
-              strokeOpacity: 0.8,
-              strokeWeight: 1,
-              fillColor: "#1a73e8",
-              fillOpacity: 0.12,
-              map,
-              center: { lat, lng },
-              radius: accuracy
-            });
-
-            map.setCenter({ lat, lng });
-            map.setZoom(16);
-
-            status.textContent = `現在地を表示しました（精度目安: 約 ${Math.round(accuracy)}m）`;
-          },
-          (err) => {
-            status.textContent = `位置情報を取得できません：${err.message}`;
-          },
-          {
-            enableHighAccuracy: true,
-            timeout: 12000,
-            maximumAge: 0
           }
         );
+
+
+        bounds.extend({
+
+          lat: spot.lat,
+
+          lng: spot.lng
+
+        });
+
+      });
+
+
+      /* ================================
+         最初の表示範囲
+      ================================= */
+
+      if (
+        spots.length > 0 &&
+        !getSpotFromQuery()
+      ) {
+
+        map.fitBounds(bounds);
+
       }
-    });
+
+
+      /* ================================
+         カテゴリフィルター初期化
+      ================================= */
+
+      setupCategoryFilter();
+
+
+      /* ================================
+         URLからスポット指定
+      ================================= */
+
+      if (getSpotFromQuery()) {
+
+        focusSpotIfNeeded();
+
+      } else {
+
+        document
+          .getElementById("status")
+          .textContent =
+            `地図を表示しました。スポット数：${spots.length}`;
+
+      }
+
+
+      /* ================================
+         現在地自動表示
+      ================================= */
+
+      autoOpenCurrentLocationIfNeeded();
+
+    }
+
+
+    /* =========================================================
+       現在地
+    ========================================================== */
+
+    document.addEventListener(
+      "click",
+      (e) => {
+
+        if (
+          e.target &&
+          e.target.id === "locateBtn"
+        ) {
+
+          const status =
+            document.getElementById("status");
+
+
+          /*
+            Google Sitesに埋め込まれている場合は
+            新しいページで開く
+          */
+
+          if (isEmbedded()) {
+
+            const url =
+              new URL(window.location.href);
+
+            url.searchParams.set(
+              "showCurrentLocation",
+              "1"
+            );
+
+            window.open(
+              url.toString(),
+              "_blank",
+              "noopener,noreferrer"
+            );
+
+            return;
+          }
+
+
+          /* ================================
+             Geolocation対応確認
+          ================================= */
+
+          if (!navigator.geolocation) {
+
+            status.textContent =
+              "この端末は位置情報に対応していません。";
+
+            return;
+          }
+
+
+          status.textContent =
+            "位置情報を取得しています…（許可が出たら「許可」）";
+
+
+          /* ================================
+             現在地取得
+          ================================= */
+
+          navigator.geolocation.getCurrentPosition(
+
+            (pos) => {
+
+              const lat =
+                pos.coords.latitude;
+
+              const lng =
+                pos.coords.longitude;
+
+              const accuracy =
+                pos.coords.accuracy || 0;
+
+
+              /* 古い現在地を削除 */
+
+              if (currentMarker) {
+                currentMarker.map = null;
+              }
+
+              if (currentCircle) {
+                currentCircle.setMap(null);
+              }
+
+
+              /* ================================
+                 現在地マーカー
+              ================================= */
+
+              currentMarker =
+                new google.maps.marker.AdvancedMarkerElement({
+
+                  map,
+
+                  position: {
+                    lat,
+                    lng
+                  },
+
+                  title: "現在地",
+
+                  content:
+                    createCurrentLocationElement()
+
+                });
+
+
+              /* ================================
+                 精度円
+              ================================= */
+
+              currentCircle =
+                new google.maps.Circle({
+
+                  strokeColor: "#1a73e8",
+
+                  strokeOpacity: 0.8,
+
+                  strokeWeight: 1,
+
+                  fillColor: "#1a73e8",
+
+                  fillOpacity: 0.12,
+
+                  map,
+
+                  center: {
+                    lat,
+                    lng
+                  },
+
+                  radius: accuracy
+
+                });
+
+
+              /* ================================
+                 現在地へ移動
+              ================================= */
+
+              map.setCenter({
+                lat,
+                lng
+              });
+
+              map.setZoom(16);
+
+
+              status.textContent =
+                `現在地を表示しました（精度目安: 約 ${Math.round(accuracy)}m）`;
+
+            },
+
+
+            /* ================================
+               位置情報エラー
+            ================================= */
+
+            (err) => {
+
+              status.textContent =
+                `位置情報を取得できません：${err.message}`;
+
+            },
+
+
+            /* ================================
+               Geolocation設定
+            ================================= */
+
+            {
+
+              enableHighAccuracy: true,
+
+              timeout: 12000,
+
+              maximumAge: 0
+
+            }
+
+          );
+
+        }
+
+      }
+    );
+
   </script>
 
+
+  <!-- ================================
+       GTranslate
+  ================================= -->
+
   <script>
+
     window.gtranslateSettings = {
+
       default_language: "ja",
+
       native_language_names: true,
+
       detect_browser_language: true,
-      languages: ["ja","en","zh-CN","zh-TW"],
-      wrapper_selector: ".gtranslate_wrapper"
+
+      languages: [
+        "ja",
+        "en",
+        "zh-CN",
+        "zh-TW"
+      ],
+
+      wrapper_selector:
+        ".gtranslate_wrapper"
+
     };
+
   </script>
+
+
+  <!-- ================================
+       Google Maps
+  ================================= -->
 
   <script
     async
     defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJyr_HKLzeJaqNfIbmKONqWGROFveQZ7s&libraries=marker&callback=initMap">
   </script>
-  <script src="https://cdn.gtranslate.net/widgets/latest/float.js" defer></script>
+
+
+  <!-- ================================
+       GTranslate Widget
+  ================================= -->
+
+  <script
+    src="https://cdn.gtranslate.net/widgets/latest/float.js"
+    defer>
+  </script>
+
 </body>
 </html>
