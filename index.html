@@ -19,9 +19,10 @@
       height: 100vh;
     }
 
-    /* =========================
+
+    /* ========================================
        上部UI
-    ========================== */
+    ======================================== */
 
     .top-ui {
       position: absolute;
@@ -32,10 +33,15 @@
 
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
 
       pointer-events: none;
     }
+
+
+    /* ========================================
+       現在地ボタン
+    ======================================== */
 
     .locate-row {
       display: flex;
@@ -44,16 +50,16 @@
     }
 
     .map-btn {
-      min-height: 44px;
-      padding: 10px 14px;
+      min-height: 42px;
+      padding: 8px 12px;
 
       border: 1px solid #ddd;
-      border-radius: 10px;
+      border-radius: 9px;
 
       background: #fff;
       color: #222;
 
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
 
       cursor: pointer;
@@ -67,128 +73,171 @@
       box-sizing: border-box;
     }
 
-    /* =========================
+
+    /* ========================================
        カテゴリパネル
-    ========================== */
+    ======================================== */
 
     .category-panel {
       pointer-events: auto;
 
       width: 100%;
-      max-width: 520px;
 
-      padding: 8px;
+      padding: 6px;
 
-      background: rgba(255,255,255,0.96);
+      background: rgba(255,255,255,0.94);
 
-      border: 1px solid #ddd;
-      border-radius: 12px;
+      border: 1px solid rgba(210,210,210,0.95);
+      border-radius: 10px;
 
       box-sizing: border-box;
 
-      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+      box-shadow: 0 2px 7px rgba(0,0,0,0.16);
     }
+
+
+    /*
+      スマホ前提：
+      3列 × 2段
+    */
 
     .category-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 6px;
+
+      grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+      gap: 4px;
     }
+
 
     .category-item {
       min-width: 0;
-      min-height: 42px;
+      min-height: 37px;
 
       display: flex;
       align-items: center;
+      justify-content: flex-start;
 
-      gap: 5px;
+      gap: 4px;
 
-      padding: 7px 8px;
+      padding: 4px 5px;
 
-      background: #fff;
+      background: rgba(255,255,255,0.82);
 
-      border: 1px solid #e5e5e5;
-      border-radius: 9px;
+      border: 1px solid #e1e1e1;
+      border-radius: 7px;
 
       box-sizing: border-box;
 
-      font-size: 13px;
-      line-height: 1.2;
+      font-size: 11px;
+      font-weight: 600;
+
+      line-height: 1.15;
 
       cursor: pointer;
     }
 
+
     .category-item input {
-      width: 18px;
-      height: 18px;
+      width: 16px;
+      height: 16px;
 
       margin: 0;
 
       flex-shrink: 0;
+
       cursor: pointer;
     }
 
+
     .category-label {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      min-width: 0;
+
+      white-space: normal;
+      overflow-wrap: anywhere;
     }
 
+
+    /*
+      クーリングシェルターだけ文字が長いので
+      少し小さく
+    */
+
+    .category-item.cooling {
+      font-size: 9.5px;
+    }
+
+
+    /* ========================================
+       すべて表示
+    ======================================== */
+
     .category-actions {
-      margin-top: 7px;
+      margin-top: 4px;
     }
 
     #showAllBtn {
       width: 100%;
-      min-height: 38px;
+
+      min-height: 30px;
+
+      padding: 4px 8px;
 
       border: 1px solid #ddd;
-      border-radius: 8px;
+      border-radius: 7px;
 
-      background: #f7f7f7;
+      background: rgba(248,248,248,0.95);
+
       color: #222;
 
-      font-size: 13px;
+      font-size: 11px;
       font-weight: 700;
 
       cursor: pointer;
     }
 
-    /* =========================
+
+    /* ========================================
        GTranslate
-    ========================== */
+    ======================================== */
 
     .gtranslate_wrapper {
       position: absolute;
+
       left: 8px;
       bottom: 26px;
+
       z-index: 10;
     }
 
-    /* =========================
-       小さいスマホ
-    ========================== */
 
-    @media (max-width: 420px) {
+    /* ========================================
+       特に幅が狭いスマホ
+    ======================================== */
 
-      .category-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
+    @media (max-width: 360px) {
 
       .category-item {
-        min-height: 40px;
-        font-size: 12px;
+        padding: 4px;
+        font-size: 10px;
       }
 
-      .map-btn {
-        font-size: 13px;
+      .category-item.cooling {
+        font-size: 8.8px;
       }
+
+      .category-item input {
+        width: 15px;
+        height: 15px;
+      }
+
     }
 
-    /* =========================
-       PC / タブレット
-    ========================== */
+
+    /* ========================================
+       タブレット / PC
+    ======================================== */
 
     @media (min-width: 700px) {
 
@@ -197,24 +246,36 @@
         width: 520px;
       }
 
-      .category-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+      .category-item {
+        font-size: 12px;
       }
+
+      .category-item.cooling {
+        font-size: 11px;
+      }
+
     }
   </style>
 </head>
 
+
 <body>
+
+  <!-- ========================================
+       MAP
+  ======================================== -->
 
   <div id="map"></div>
 
-  <!-- =========================
+
+  <!-- ========================================
        上部UI
-  ========================== -->
+  ======================================== -->
 
   <div class="top-ui">
 
     <div class="locate-row">
+
       <button
         type="button"
         class="map-btn"
@@ -222,92 +283,150 @@
       >
         📍 現在地を表示
       </button>
+
     </div>
+
 
     <div class="category-panel">
 
       <div class="category-grid">
 
+
+        <!-- 飲食 -->
+
         <label class="category-item">
+
           <input
             type="checkbox"
             class="category-checkbox"
             value="飲食店"
             checked
           >
-          <span class="category-label">🍴 飲食</span>
+
+          <span class="category-label">
+            🍴 飲食
+          </span>
+
         </label>
 
+
+        <!-- 買物 -->
+
         <label class="category-item">
+
           <input
             type="checkbox"
             class="category-checkbox"
             value="お買い物"
             checked
           >
-          <span class="category-label">🛍️ 買物</span>
+
+          <span class="category-label">
+            🛍️ 買物
+          </span>
+
         </label>
 
+
+        <!-- 観光 -->
+
         <label class="category-item">
+
           <input
             type="checkbox"
             class="category-checkbox"
             value="観光アトラクション"
             checked
           >
-          <span class="category-label">⭐ 観光</span>
+
+          <span class="category-label">
+            ⭐ 観光
+          </span>
+
         </label>
 
+
+        <!-- トイレ -->
+
         <label class="category-item">
+
           <input
             type="checkbox"
             class="category-checkbox"
             value="トイレ"
             checked
           >
-          <span class="category-label">🚻 トイレ</span>
+
+          <span class="category-label">
+            🚻 トイレ
+          </span>
+
         </label>
 
+
+        <!-- 注意 -->
+
         <label class="category-item">
+
           <input
             type="checkbox"
             class="category-checkbox"
             value="注意"
             checked
           >
-          <span class="category-label">⚠️ 注意</span>
+
+          <span class="category-label">
+            ⚠️ 注意
+          </span>
+
         </label>
 
-        <label class="category-item">
+
+        <!-- クーリングシェルター -->
+
+        <label class="category-item cooling">
+
           <input
             type="checkbox"
             class="category-checkbox"
             value="クーリングシェルター"
             checked
           >
-          <span class="category-label">🧊 涼む場所</span>
+
+          <span class="category-label">
+            🧊 クーリングシェルター
+          </span>
+
         </label>
 
       </div>
 
+
       <div class="category-actions">
+
         <button
           type="button"
           id="showAllBtn"
         >
           すべて表示
         </button>
+
       </div>
 
     </div>
 
   </div>
 
-  <!-- GTranslate -->
+
+  <!-- ========================================
+       GTranslate
+  ======================================== -->
+
   <div class="gtranslate_wrapper"></div>
 
 
   <script>
+
     let map;
     let infoWindow;
 
@@ -323,7 +442,10 @@
 
     const spots = [
 
-      /* ===== 飲食店 ===== */
+
+      /* =====================================================
+         飲食店
+      ===================================================== */
 
       {
         id: "minami-sushi",
@@ -530,7 +652,9 @@
       },
 
 
-      /* ===== お買い物 ===== */
+      /* =====================================================
+         お買い物
+      ===================================================== */
 
       {
         id: "green-store-nagahama",
@@ -561,7 +685,9 @@
       },
 
 
-      /* ===== 観光アトラクション ===== */
+      /* =====================================================
+         観光アトラクション
+      ===================================================== */
 
       {
         id: "amami-museum",
@@ -590,7 +716,9 @@
       },
 
 
-      /* ===== 注意 ===== */
+      /* =====================================================
+         注意
+      ===================================================== */
 
       {
         id: "habu-warning",
@@ -604,7 +732,9 @@
       },
 
 
-      /* ===== トイレ ===== */
+      /* =====================================================
+         トイレ
+      ===================================================== */
 
       {
         id: "toilet-marine-town",
@@ -700,103 +830,149 @@
 
 
       /*
-        ===== クーリングシェルター =====
+        =====================================================
+        クーリングシェルター
 
-        固定lat/lngが確定したものを
+        固定lat/lngのデータは
         category: "クーリングシェルター"
-        で追加してください。
+        でこの下に追加します。
+        =====================================================
       */
 
     ];
 
 
     /* =========================================================
-       マーカー見た目
+       マーカーのデザイン
     ========================================================== */
 
     function markerStyle(category) {
 
       if (category === "飲食店") {
-        return { color: "#ff7043", icon: "🍴" };
+        return {
+          color: "#ff7043",
+          icon: "🍴"
+        };
       }
 
       if (category === "お買い物") {
-        return { color: "#42a5f5", icon: "🛍️" };
+        return {
+          color: "#42a5f5",
+          icon: "🛍️"
+        };
       }
 
       if (category === "トイレ") {
-        return { color: "#29b6f6", icon: "🚻" };
+        return {
+          color: "#29b6f6",
+          icon: "🚻"
+        };
       }
 
       if (category === "観光案内") {
-        return { color: "#7e57c2", icon: "ℹ️" };
+        return {
+          color: "#7e57c2",
+          icon: "ℹ️"
+        };
       }
 
       if (category === "観光アトラクション") {
-        return { color: "#8e24aa", icon: "⭐" };
+        return {
+          color: "#8e24aa",
+          icon: "⭐"
+        };
       }
 
       if (category === "注意") {
-        return { color: "#ef5350", icon: "⚠️" };
+        return {
+          color: "#ef5350",
+          icon: "⚠️"
+        };
       }
 
       if (category === "クーリングシェルター") {
-        return { color: "#00acc1", icon: "🧊" };
+        return {
+          color: "#00acc1",
+          icon: "🧊"
+        };
       }
 
       if (category === "病院") {
-        return { color: "#66bb6a", icon: "✚" };
+        return {
+          color: "#66bb6a",
+          icon: "✚"
+        };
       }
 
       if (category === "港") {
-        return { color: "#3949ab", icon: "⚓" };
+        return {
+          color: "#3949ab",
+          icon: "⚓"
+        };
       }
 
-      return { color: "#8d6e63", icon: "📍" };
+      return {
+        color: "#8d6e63",
+        icon: "📍"
+      };
     }
 
 
     function createMarkerElement(category) {
 
-      const style = markerStyle(category);
+      const style =
+        markerStyle(category);
 
-      const el = document.createElement("div");
+      const el =
+        document.createElement("div");
 
       el.style.width = "36px";
       el.style.height = "36px";
+
       el.style.borderRadius = "50%";
 
-      el.style.background = style.color;
+      el.style.background =
+        style.color;
 
       el.style.display = "flex";
+
       el.style.alignItems = "center";
       el.style.justifyContent = "center";
 
       el.style.fontSize = "18px";
 
-      el.style.border = "2px solid #fff";
+      el.style.border =
+        "2px solid #fff";
 
       el.style.boxShadow =
         "0 2px 6px rgba(0,0,0,0.28)";
 
-      el.textContent = style.icon;
+      el.textContent =
+        style.icon;
 
       return el;
     }
 
 
+    /* =========================================================
+       現在地マーカー
+    ========================================================== */
+
     function createCurrentLocationElement() {
 
-      const el = document.createElement("div");
+      const el =
+        document.createElement("div");
 
       el.style.width = "20px";
       el.style.height = "20px";
 
       el.style.borderRadius = "50%";
 
-      el.style.background = "#1a73e8";
+      el.style.background =
+        "#1a73e8";
 
-      el.style.border = "3px solid #fff";
+      el.style.border =
+        "3px solid #fff";
 
       el.style.boxShadow =
         "0 2px 6px rgba(0,0,0,0.28)";
@@ -810,12 +986,14 @@
     ========================================================== */
 
     function isEmbedded() {
+
       return window.self !== window.top;
+
     }
 
 
     /* =========================================================
-       URL
+       URLパラメータ
     ========================================================== */
 
     function getSpotFromQuery() {
@@ -842,17 +1020,28 @@
 
     function getSelectedCategories() {
 
-      const selected = new Set();
+      const selected =
+        new Set();
+
 
       document
-        .querySelectorAll(".category-checkbox")
-        .forEach((checkbox) => {
+        .querySelectorAll(
+          ".category-checkbox"
+        )
+        .forEach(
+          checkbox => {
 
-          if (checkbox.checked) {
-            selected.add(checkbox.value);
+            if (checkbox.checked) {
+
+              selected.add(
+                checkbox.value
+              );
+
+            }
+
           }
+        );
 
-        });
 
       return selected;
     }
@@ -863,17 +1052,23 @@
       const selected =
         getSelectedCategories();
 
-      spotMarkers.forEach((item) => {
 
-        item.marker.map =
-          selected.has(item.category)
-            ? map
-            : null;
+      spotMarkers.forEach(
+        item => {
 
-      });
+          item.marker.map =
+            selected.has(item.category)
+              ? map
+              : null;
+
+        }
+      );
+
 
       if (infoWindow) {
+
         infoWindow.close();
+
       }
 
     }
@@ -882,30 +1077,41 @@
     function setupCategoryFilter() {
 
       document
-        .querySelectorAll(".category-checkbox")
-        .forEach((checkbox) => {
+        .querySelectorAll(
+          ".category-checkbox"
+        )
+        .forEach(
+          checkbox => {
 
-          checkbox.addEventListener(
-            "change",
-            updateCategoryMarkers
-          );
+            checkbox.addEventListener(
+              "change",
+              updateCategoryMarkers
+            );
 
-        });
+          }
+        );
 
 
       document
-        .getElementById("showAllBtn")
+        .getElementById(
+          "showAllBtn"
+        )
         .addEventListener(
           "click",
           () => {
 
             document
-              .querySelectorAll(".category-checkbox")
-              .forEach((checkbox) => {
+              .querySelectorAll(
+                ".category-checkbox"
+              )
+              .forEach(
+                checkbox => {
 
-                checkbox.checked = true;
+                  checkbox.checked = true;
 
-              });
+                }
+              );
+
 
             updateCategoryMarkers();
 
@@ -916,7 +1122,7 @@
 
 
     /* =========================================================
-       指定スポットへ移動
+       URL指定スポット
     ========================================================== */
 
     function focusSpotIfNeeded() {
@@ -924,16 +1130,28 @@
       const spotId =
         getSpotFromQuery();
 
-      if (!spotId) return;
+
+      if (!spotId) {
+        return;
+      }
 
 
       const target =
         spots.find(
-          spot => spot.id === spotId
+          spot =>
+            spot.id === spotId
         );
 
-      if (!target) return;
 
+      if (!target) {
+        return;
+      }
+
+
+      /*
+        URLから直接開いたスポットのカテゴリは
+        必ずONにする
+      */
 
       const checkbox =
         Array.from(
@@ -941,7 +1159,8 @@
             ".category-checkbox"
           )
         ).find(
-          cb => cb.value === target.category
+          cb =>
+            cb.value === target.category
         );
 
 
@@ -955,9 +1174,12 @@
 
 
       map.setCenter({
+
         lat: target.lat,
         lng: target.lng
+
       });
+
 
       map.setZoom(19);
 
@@ -970,40 +1192,56 @@
 
     function autoOpenCurrentLocationIfNeeded() {
 
-      if (!shouldAutoOpenCurrentLocation()) {
+      if (
+        !shouldAutoOpenCurrentLocation()
+      ) {
+
         return;
+
       }
 
 
-      setTimeout(() => {
+      setTimeout(
+        () => {
 
-        const btn =
-          document.getElementById("locateBtn");
+          const btn =
+            document.getElementById(
+              "locateBtn"
+            );
 
-        if (btn) {
-          btn.click();
-        }
 
-      }, 500);
+          if (btn) {
+
+            btn.click();
+
+          }
+
+        },
+        500
+      );
 
     }
 
 
     /* =========================================================
-       Google Maps 初期化
+       Google Maps初期化
     ========================================================== */
 
     async function initMap() {
 
       const center = {
+
         lat: 28.389,
         lng: 129.487
+
       };
 
 
       map =
         new google.maps.Map(
-          document.getElementById("map"),
+          document.getElementById(
+            "map"
+          ),
           {
 
             center,
@@ -1031,113 +1269,138 @@
         new google.maps.LatLngBounds();
 
 
-      spots.forEach((spot) => {
+      /* =====================================================
+         マーカー生成
+      ===================================================== */
 
-        const marker =
-          new google.maps.marker.AdvancedMarkerElement({
+      spots.forEach(
+        spot => {
 
-            map,
+          const marker =
+            new google.maps.marker.AdvancedMarkerElement({
 
-            position: {
-              lat: spot.lat,
-              lng: spot.lng
-            },
+              map,
 
-            title: spot.title,
+              position: {
 
-            content:
-              createMarkerElement(
-                spot.category
-              )
+                lat: spot.lat,
+                lng: spot.lng
+
+              },
+
+              title:
+                spot.title,
+
+              content:
+                createMarkerElement(
+                  spot.category
+                )
+
+            });
+
+
+          spotMarkers.push({
+
+            marker,
+            category: spot.category,
+            spot
 
           });
 
 
-        spotMarkers.push({
-          marker,
-          category: spot.category,
-          spot
-        });
+          /* Google Maps道順 */
+
+          const navUrl =
+            `https://www.google.com/maps/dir/?api=1&origin=Current+Location&destination=${spot.lat},${spot.lng}&travelmode=walking`;
 
 
-        const navUrl =
-          `https://www.google.com/maps/dir/?api=1&origin=Current+Location&destination=${spot.lat},${spot.lng}&travelmode=walking`;
+          marker.addListener(
+            "click",
+            () => {
 
-
-        marker.addListener(
-          "click",
-          () => {
-
-            infoWindow.setContent(`
-
-              <div
-                style="
-                  max-width:260px;
-                  line-height:1.5;
-                "
-              >
+              infoWindow.setContent(`
 
                 <div
                   style="
-                    font-weight:700;
-                    font-size:15px;
-                    margin-bottom:6px;
+                    max-width:260px;
+                    line-height:1.5;
                   "
                 >
-                  ${spot.title}
+
+                  <div
+                    style="
+                      font-weight:700;
+                      font-size:15px;
+                      margin-bottom:6px;
+                    "
+                  >
+                    ${spot.title}
+                  </div>
+
+
+                  <div
+                    style="
+                      color:#666;
+                      font-size:12px;
+                      margin-bottom:7px;
+                    "
+                  >
+                    カテゴリ：${spot.category}
+                  </div>
+
+
+                  <div
+                    style="
+                      white-space:pre-wrap;
+                      margin-bottom:10px;
+                    "
+                  >
+                    ${spot.description}
+                  </div>
+
+
+                  <a
+                    href="${navUrl}"
+                    target="_blank"
+                    rel="noopener"
+                    style="
+                      font-weight:600;
+                    "
+                  >
+                    現在地から案内
+                  </a>
+
                 </div>
 
-                <div
-                  style="
-                    color:#666;
-                    font-size:12px;
-                    margin-bottom:7px;
-                  "
-                >
-                  カテゴリ：${spot.category}
-                </div>
-
-                <div
-                  style="
-                    white-space:pre-wrap;
-                    margin-bottom:10px;
-                  "
-                >
-                  ${spot.description}
-                </div>
-
-                <a
-                  href="${navUrl}"
-                  target="_blank"
-                  rel="noopener"
-                  style="
-                    font-weight:600;
-                  "
-                >
-                  現在地から案内
-                </a>
-
-              </div>
-
-            `);
+              `);
 
 
-            infoWindow.open({
-              anchor: marker,
-              map
-            });
+              infoWindow.open({
 
-          }
-        );
+                anchor: marker,
+                map
+
+              });
+
+            }
+          );
 
 
-        bounds.extend({
-          lat: spot.lat,
-          lng: spot.lng
-        });
+          bounds.extend({
 
-      });
+            lat: spot.lat,
+            lng: spot.lng
 
+          });
+
+        }
+      );
+
+
+      /*
+        URLからスポット指定が無いときだけ
+        全スポットを画面内に収める
+      */
 
       if (
         spots.length > 0 &&
@@ -1152,8 +1415,12 @@
       setupCategoryFilter();
 
 
-      if (getSpotFromQuery()) {
+      if (
+        getSpotFromQuery()
+      ) {
+
         focusSpotIfNeeded();
+
       }
 
 
@@ -1167,20 +1434,31 @@
     ========================================================== */
 
     document
-      .getElementById("locateBtn")
+      .getElementById(
+        "locateBtn"
+      )
       .addEventListener(
         "click",
         () => {
 
+
+          /*
+            Google Sites埋め込み時
+          */
+
           if (isEmbedded()) {
 
             const url =
-              new URL(window.location.href);
+              new URL(
+                window.location.href
+              );
+
 
             url.searchParams.set(
               "showCurrentLocation",
               "1"
             );
+
 
             window.open(
               url.toString(),
@@ -1188,43 +1466,69 @@
               "noopener,noreferrer"
             );
 
+
             return;
+
           }
 
 
-          if (!navigator.geolocation) {
+          /*
+            Geolocation対応確認
+          */
+
+          if (
+            !navigator.geolocation
+          ) {
 
             alert(
               "この端末は位置情報に対応していません。"
             );
 
             return;
+
           }
 
 
           navigator.geolocation.getCurrentPosition(
 
-            (position) => {
+
+            /* 成功 */
+
+            position => {
 
               const lat =
                 position.coords.latitude;
 
+
               const lng =
                 position.coords.longitude;
+
 
               const accuracy =
                 position.coords.accuracy || 0;
 
 
+              /*
+                古い現在地を削除
+              */
+
               if (currentMarker) {
+
                 currentMarker.map = null;
+
               }
 
 
               if (currentCircle) {
+
                 currentCircle.setMap(null);
+
               }
 
+
+              /*
+                現在地マーカー
+              */
 
               currentMarker =
                 new google.maps.marker.AdvancedMarkerElement({
@@ -1232,11 +1536,14 @@
                   map,
 
                   position: {
+
                     lat,
                     lng
+
                   },
 
-                  title: "現在地",
+                  title:
+                    "現在地",
 
                   content:
                     createCurrentLocationElement()
@@ -1244,42 +1551,59 @@
                 });
 
 
+              /*
+                現在地精度円
+              */
+
               currentCircle =
                 new google.maps.Circle({
 
                   map,
 
                   center: {
+
                     lat,
                     lng
+
                   },
 
-                  radius: accuracy,
+                  radius:
+                    accuracy,
 
-                  strokeColor: "#1a73e8",
+                  strokeColor:
+                    "#1a73e8",
 
-                  strokeOpacity: 0.8,
+                  strokeOpacity:
+                    0.8,
 
-                  strokeWeight: 1,
+                  strokeWeight:
+                    1,
 
-                  fillColor: "#1a73e8",
+                  fillColor:
+                    "#1a73e8",
 
-                  fillOpacity: 0.12
+                  fillOpacity:
+                    0.12
 
                 });
 
 
               map.setCenter({
+
                 lat,
                 lng
+
               });
+
 
               map.setZoom(16);
 
             },
 
 
-            (error) => {
+            /* エラー */
+
+            error => {
 
               alert(
                 "位置情報を取得できませんでした。\n" +
@@ -1289,10 +1613,19 @@
             },
 
 
+            /* 設定 */
+
             {
-              enableHighAccuracy: true,
-              timeout: 12000,
-              maximumAge: 0
+
+              enableHighAccuracy:
+                true,
+
+              timeout:
+                12000,
+
+              maximumAge:
+                0
+
             }
 
           );
@@ -1307,17 +1640,22 @@
 
     window.gtranslateSettings = {
 
-      default_language: "ja",
+      default_language:
+        "ja",
 
-      native_language_names: true,
+      native_language_names:
+        true,
 
-      detect_browser_language: true,
+      detect_browser_language:
+        true,
 
       languages: [
+
         "ja",
         "en",
         "zh-CN",
         "zh-TW"
+
       ],
 
       wrapper_selector:
@@ -1328,10 +1666,12 @@
   </script>
 
 
-  <!--
-    ↓↓↓ YOUR_API_KEY の部分だけ
-    現在使っているAPIキーへ置き換え
-  -->
+  <!-- ========================================
+       Google Maps
+
+       YOUR_API_KEY を
+       現在使用中のAPIキーへ変更
+  ======================================== -->
 
   <script
     async
@@ -1340,10 +1680,15 @@
   </script>
 
 
+  <!-- ========================================
+       GTranslate
+  ======================================== -->
+
   <script
     src="https://cdn.gtranslate.net/widgets/latest/float.js"
     defer>
   </script>
+
 
 </body>
 </html>
